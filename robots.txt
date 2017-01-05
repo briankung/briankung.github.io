@@ -1,4 +1,0 @@
-User-agent: *
-Disallow: 
-
-Sitemap: http://briankung.github.io/sitemap.xml 
