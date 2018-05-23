@@ -40,45 +40,44 @@
       }
     )
 
-    await gistFileUrls.forEach(
-      async (gistUrls) => {
-        for (let index in gistUrls) {
-          let url = gistUrls[index]
+    for (const gistIndex in gistFileUrls) {
+      const gistUrls = gistFileUrls[gistIndex]
 
-          const response = await fetch(url)
-          const text = await response.text()
+      for (const index in gistUrls) {
+        const url = gistUrls[index]
 
-          const gistId = url.match(/briankung\/(.+)\/raw/)[1]
-          const fileName = url.split('/').pop()
-          const section = document.createElement('section')
+        const response = await fetch(url)
+        const text = await response.text()
 
-          if (url.endsWith('.md')) {
-            section.innerHTML = marked(text)
-            bodyContents.push(section)
-          } else {
-            const callbackName = `cb${gistId}${fileName.replace('.', '')}`
-            const gistJsonpUrl = `https://gist.github.com/briankung/${gistId}.json?file=${fileName}&callback=${callbackName}`
-            const script = document.createElement('script')
-            const div = document.createElement('div')
+        const gistId = url.match(/briankung\/(.+)\/raw/)[1]
+        const fileName = url.split('/').pop()
+        const section = document.createElement('section')
 
-            script.src = gistJsonpUrl
-            div.id = `${gistId}${fileName}`
+        if (url.endsWith('.md')) {
+          section.innerHTML = marked(text)
+          bodyContents.push(section)
+        } else {
+          const callbackName = `cb${gistId}${fileName.replace('.', '')}`
+          const gistJsonpUrl = `https://gist.github.com/briankung/${gistId}.json?file=${fileName}&callback=${callbackName}`
+          const script = document.createElement('script')
+          const div = document.createElement('div')
 
-            bodyContents.push(div)
+          script.src = gistJsonpUrl
+          div.id = `${gistId}${fileName}`
 
-            window[callbackName] = function (gistData) {
-              const i = bodyContents.indexOf(div)
-              section.innerHTML = gistData.div
-              bodyContents[i] = section
-              fillBody(bodyContents)
-            }
+          bodyContents.push(div)
 
-            document.body.appendChild(script)
+          window[callbackName] = function (gistData) {
+            const i = bodyContents.indexOf(div)
+            section.innerHTML = gistData.div
+            bodyContents[i] = section
+            fillBody(bodyContents)
           }
+
+          document.body.appendChild(script)
         }
-        // await gistUrls.forEach(async (url) => {}})
       }
-    )
+    }
   }
 
   main()
