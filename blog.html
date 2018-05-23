@@ -42,7 +42,9 @@
 
     await gistFileUrls.forEach(
       async (gistUrls) => {
-        const results = await gistUrls.map(async (url) => {
+        for (let index in gistUrls) {
+          let url = gistUrls[index]
+
           const response = await fetch(url)
           const text = await response.text()
 
@@ -73,8 +75,8 @@
 
             document.body.appendChild(script)
           }
-
-        })
+        }
+        // await gistUrls.forEach(async (url) => {}})
       }
     )
   }
