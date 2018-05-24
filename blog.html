@@ -46,10 +46,12 @@
       const link = document.createElement('a')
       const title = document.createElement('h1')
       const footer = document.createElement('footer')
+      const titleText = gist.description.replace('[RFC]', '').trim()
+      const slug = titleText.toLowerCase().replace(/[^\w]+/gi, '-') + `-${gist.id}`
 
-      article.id = gist.id
-      link.href = `#${gist.id}`
-      title.innerText = gist.description.replace('[RFC]', '').trim()
+      article.id = slug
+      link.href = `#${slug}`
+      title.innerText = titleText
       link.append(title)
       article.append(link)
 
