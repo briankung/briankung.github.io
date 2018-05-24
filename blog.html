@@ -18,8 +18,14 @@
 
   const debounce = (a,b=250,c) => (...d)=>clearTimeout(c,c=setTimeout(()=>a(...d),b))
 
-  const fillBody = debounce((contents) => {
-    contents.forEach(c => document.body.append(c))
+  const fillBody = debounce((articles) => {
+    articles.forEach(article => {
+      document.body.append(article)
+
+      const urlHash = window.location.hash.slice(1)
+
+      if (article.id === urlHash) article.scrollIntoView({behavior: 'smooth', block: 'start'})
+    })
   })
 
   async function main () {
@@ -41,8 +47,8 @@
       const title = document.createElement('h1')
       const footer = document.createElement('footer')
 
+      article.id = gist.id
       link.href = `#${gist.id}`
-      link.id = gist.id
       title.innerText = gist.description.replace('[RFC]', '').trim()
       link.append(title)
       article.append(link)
@@ -76,7 +82,7 @@
             fillBody(bodyContents)
           }
 
-          document.body.appendChild(script)
+          document.body.append(script)
         }
 
         article.append(footer)
