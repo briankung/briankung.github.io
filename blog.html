@@ -41,15 +41,13 @@
       const title = document.createElement('h1')
       const footer = document.createElement('footer')
 
-      link.href = gist.html_url
+      link.href = `#${gist.id}`
+      link.id = gist.id
       title.innerText = gist.description.replace('[RFC]', '').trim()
       link.append(title)
       article.append(link)
 
-      const commentsLink = link.cloneNode()
-      commentsLink.href += "#partial-timeline-marker"
-      commentsLink.innerText = `${gist.comments} comments`
-      footer.append(commentsLink)
+      footer.innerHTML = `<a href="${gist.html_url}#partial-timeline-marker">${gist.comments} comments</a> | <a href="${gist.html_url}">source</a>`
 
       for (const index in gistUrls) {
         const url = gistUrls[index]
