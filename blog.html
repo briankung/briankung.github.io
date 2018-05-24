@@ -6,22 +6,13 @@
     <!-- <meta name="viewport" content="width=device-width, initial-scale=1.0"> -->
     <link rel="stylesheet" href="https://assets-cdn.github.com/assets/gist-embed-8c6ade0d3779da026346afb9bf324f67.css"></link>
   </head>
-  <body>
-    <!-- <article>
-      <header></header>
-
-      <section></section>
-
-      <footer></footer>
-
-    </article> -->
-  </body>
+  <body></body>
 </html>
 
 <script src="https://cdn.jsdelivr.net/npm/marked/marked.min.js"></script>
 
 <script type="text/javascript">
-  const GISTS_URL = 'https://api.github.com/users/briankung/gists'
+  const GISTS_URL = 'https://api.github.com/users/briankung/gists?per_page=1000' // This won't ever be a problem...🙄
   let gists, gistFileUrls, bodyContents
   bodyContents = []
 
@@ -34,7 +25,7 @@
   async function main () {
     response = await fetch(GISTS_URL)
     gists = await response.json()
-    gists = gists.filter(gist => /\brfc\b/i.test(gist.description))
+    gists = gists.filter(gist => gist.description.startsWith('[RFC]'))
     gistFileUrls = gists.map(
       (gist) => {
         return Object.entries(gist.files).map(([_, obj]) => obj.raw_url )
@@ -43,6 +34,22 @@
 
     for (const gistIndex in gistFileUrls) {
       const gistUrls = gistFileUrls[gistIndex]
+      const gist = gists[gistIndex]
+
+      const article = document.createElement('article')
+      const link = document.createElement('a')
+      const title = document.createElement('h1')
+      const footer = document.createElement('footer')
+
+      link.href = gist.html_url
+      title.innerText = gist.description.replace('[RFC]', '').trim()
+      link.append(title)
+      article.append(link)
+
+      const commentsLink = link.cloneNode()
+      commentsLink.href += "#partial-timeline-marker"
+      commentsLink.innerText = `${gist.comments} comments`
+      footer.append(commentsLink)
 
       for (const index in gistUrls) {
         const url = gistUrls[index]
@@ -56,7 +63,7 @@
 
         if (url.endsWith('.md')) {
           section.innerHTML = marked(text)
-          bodyContents.push(section)
+          article.append(section)
         } else {
           const callbackName = `cb${gistId}${fileName.replace('.', '')}`
           const gistJsonpUrl = `https://gist.github.com/briankung/${gistId}.json?file=${fileName}&callback=${callbackName}`
@@ -64,19 +71,18 @@
           const div = document.createElement('div')
 
           script.src = gistJsonpUrl
-          div.id = `${gistId}${fileName}`
-
-          bodyContents.push(div)
+          article.append(section)
 
           window[callbackName] = function (gistData) {
-            const i = bodyContents.indexOf(div)
             section.innerHTML = gistData.div
-            bodyContents[i] = section
             fillBody(bodyContents)
           }
 
           document.body.appendChild(script)
         }
+
+        article.append(footer)
+        bodyContents.push(article)
       }
     }
   }
@@ -91,6 +97,18 @@
     margin: auto;
   }
 }
+
+article {
+  border-bottom: 1px solid lightgrey;
+  padding-bottom: 2em;
+  margin-bottom: 3em;
+}
+
+footer {
+  margin-top: 2em;
+}
+
+/* Typography stuff */
 
 code {
   background-color: lightgrey;
