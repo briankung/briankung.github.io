@@ -60,7 +60,7 @@
         ONE_MINUTE = MILLISECONDS * 60,
         clock = document.getElementById('clock');
 
-  function setTime() {
+  function updateDisplayTime() {
     const date = new Date,
           timeString = date.toLocaleString(
             'zh-CN',
@@ -78,10 +78,10 @@
     clock.prepend(tspan);
   };
 
-  setTime();
+  updateDisplayTime();
 
   window.setTimeout(
-    () => window.setInterval(setTime, ONE_MINUTE),
+    () => window.setInterval(updateDisplayTime, ONE_MINUTE),
     (ONE_MINUTE - ((new Date).getSeconds() * MILLISECONDS))
   );
 </script>
