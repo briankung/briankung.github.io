@@ -38,14 +38,14 @@
 
 <script>
   const MILLISECONDS = 1000,
-        ONE_SECOND = MILLISECONDS,
-        ONE_MINUTE = MILLISECONDS * 60,
-        clock = document.getElementById('clock'),
-        noSleep = new NoSleep();
+        ONE_MINUTE_IN_MILLISECONDS = MILLISECONDS * 60,
+        NO_SLEEP = new NoSleep(),
+        CLOCK = document.getElementById('clock'),
+        MS_TO_NEXT_MINUTE = (ONE_MINUTE_IN_MILLISECONDS - ((new Date).getSeconds() * MILLISECONDS));
 
   function toggleFullscreen() {
     document.webkitIsFullScreen == undefined ? standardToggleFullscreen() : webkitToggleFullscreen();
-    noSleep.enabled ? noSleep.disable() : noSleep.enable();
+    NO_SLEEP.enabled ? NO_SLEEP.disable() : NO_SLEEP.enable();
   };
 
   function webkitToggleFullscreen() {
@@ -57,27 +57,27 @@
   };
 
   function updateDisplayTime() {
-    const date = new Date,
-          timeString = date.toLocaleString(
-            'zh-CN',
-            {
+    const [_, ampm, time] = (new Date)
+            .toLocaleString('zh-CN', {
               hour: 'numeric',
               minute: 'numeric',
               hour12: true
-            }
-          ),
-          [_, ampm, time] = timeString.match(/^(.{2})(.+)$/),
+            })
+            .match(/^(.{2})(.+)$/),
           tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
 
     tspan.textContent = ampm;
-    clock.textContent = time;
-    clock.prepend(tspan);
+    CLOCK.textContent = time;
+    CLOCK.prepend(tspan);
   };
 
-  updateDisplayTime();
-
   window.setTimeout(
-    () => window.setInterval(updateDisplayTime, ONE_MINUTE),
-    (ONE_MINUTE - ((new Date).getSeconds() * MILLISECONDS))
+    () => {
+      updateDisplayTime();
+      window.setInterval(updateDisplayTime, ONE_MINUTE_IN_MILLISECONDS)
+    },
+    MS_TO_NEXT_MINUTE
   );
+
+  updateDisplayTime();
 </script>
