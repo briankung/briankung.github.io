@@ -5,7 +5,7 @@
   "background_color": "#fff",
   "display": "standalone",
   "orientation": "landscape",
-  "scope": "/",
+  "scope": "/clock",
   "start_url": "https://briankung.xyz/clock",
   "icons": [
     {
