@@ -36,13 +36,24 @@
 
 <script>
   function toggleFullscreen() {
+    document.webkitIsFullScreen == undefined ? standardToggleFullscreen() : webkitToggleFullscreen();
+  };
+
+  function webkitToggleFullscreen() {
+    if (document.webkitIsFullScreen) {
+      document.webkitExitFullscreen();
+    } else {
+      document.body.webkitRequestFullscreen();
+    }
+  };
+
+  function standardToggleFullscreen() {
     if (document.fullscreen) {
       document.exitFullscreen();
-      console.log('please exit')
     } else {
       document.body.requestFullscreen();
     }
-  }
+  };
 
   const MILLISECONDS = 1000,
         ONE_SECOND = MILLISECONDS,
@@ -72,5 +83,5 @@
   window.setTimeout(
     () => window.setInterval(setTime, ONE_MINUTE),
     (ONE_MINUTE - ((new Date).getSeconds() * MILLISECONDS))
-  )
+  );
 </script>
