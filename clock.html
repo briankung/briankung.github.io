@@ -4,22 +4,29 @@
   <title>briankung.xyz - 阿公 clock</title>
 
   <style>
-    body {
+    body, html {
       background-color: black;
+      height: 100%;
+      display: grid;
     }
 
     svg {
       width: 100%;
+      margin: auto;
     }
 
-    text#clock {
+    text {
       font-family: 'SimSun', sans-serif;
       fill: #f8f8ff;
+    }
+
+    text tspan {
+      font-size: x-small;
     }
   </style>
 </head>
 <body>
-  <svg viewBox="0 0 65 18">
+  <svg viewBox="0 0 53 18">
     <text id="clock" x="0" y="15"></text>
   </svg>
 </body>
@@ -32,14 +39,21 @@
         clock = document.getElementById('clock');
 
   function setTime() {
-    clock.textContent = (new Date).toLocaleString(
-      'zh-CN',
-      {
-        hour: 'numeric',
-        minute: 'numeric',
-        hour12: true
-      }
-    );
+    const date = new Date,
+          timeString = date.toLocaleString(
+            'zh-CN',
+            {
+              hour: 'numeric',
+              minute: 'numeric',
+              hour12: true
+            }
+          ),
+          [_, ampm, time] = timeString.match(/^(.{2})(.+)$/),
+          tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+
+    tspan.textContent = ampm;
+    clock.textContent = time;
+    clock.prepend(tspan);
   };
 
   setTime();
