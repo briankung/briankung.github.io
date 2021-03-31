@@ -6,7 +6,7 @@
   "display": "standalone",
   "orientation": "landscape",
   "scope": "/clock",
-  "start_url": "https://briankung.xyz/clock",
+  "start_url": "https://briankung.xyz/clock/index",
   "icons": [
     {
       "src": "images/icons/icon-72x72.png",
