@@ -1,0 +1,17 @@
+!<!DOCTYPE html>
+<html>
+<head>
+  <title>briankung.xyz - 阿公 clock</title>
+</head>
+<body>
+  <span id="clock"></span>
+</body>
+</html>
+
+<script>
+  const clock = document.getElementById('clock');
+  window.setInterval(
+    () => clock.innerText = (new Date),
+    1000
+  )
+</script>
