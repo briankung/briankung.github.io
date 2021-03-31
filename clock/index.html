@@ -49,19 +49,11 @@
   };
 
   function webkitToggleFullscreen() {
-    if (document.webkitIsFullScreen) {
-      document.webkitExitFullscreen();
-    } else {
-      document.body.webkitRequestFullscreen();
-    }
+    document.webkitIsFullScreen ? document.webkitExitFullscreen() : document.body.webkitRequestFullscreen();
   };
 
   function standardToggleFullscreen() {
-    if (document.fullscreen) {
-      document.exitFullscreen();
-    } else {
-      document.body.requestFullscreen();
-    }
+    document.fullscreen ? document.exitFullscreen() : document.body.requestFullscreen();
   };
 
   function updateDisplayTime() {
