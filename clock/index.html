@@ -28,7 +28,7 @@
   </style>
 </head>
 <body onclick="toggleFullscreen()">
-  <svg viewBox="0 0 60 18">
+  <svg id="svg">
     <text id="clock" x="0" y="15"></text>
   </svg>
 </body>
@@ -41,7 +41,10 @@
         ONE_MINUTE_IN_MILLISECONDS = MILLISECONDS * 60,
         NO_SLEEP = new NoSleep(),
         CLOCK = document.getElementById('clock'),
-        MS_TO_NEXT_MINUTE = (ONE_MINUTE_IN_MILLISECONDS - ((new Date).getSeconds() * MILLISECONDS));
+        MS_TO_NEXT_MINUTE = (ONE_MINUTE_IN_MILLISECONDS - ((new Date).getSeconds() * MILLISECONDS)),
+        SVG = document.getElementById('svg'),
+        SVG_VIEWBOX_ZOOM_IN = "0 0 60 18",
+        SVG_VIEWBOX_ZOOM_OUT = "0 0 53 18";
 
   function toggleFullscreen() {
     document.webkitIsFullScreen == undefined ? standardToggleFullscreen() : webkitToggleFullscreen();
@@ -68,6 +71,14 @@
 
     tspan.textContent = ampm;
     CLOCK.textContent = time;
+    const [hours, minutes] = time.split(':')
+
+    if (hours.length > 1) {
+      SVG.setAttribute('viewBox', SVG_VIEWBOX_ZOOM_IN);
+    } else {
+      SVG.setAttribute('viewBox', SVG_VIEWBOX_ZOOM_OUT);
+    };
+
     CLOCK.prepend(tspan);
   };
 
