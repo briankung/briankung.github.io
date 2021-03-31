@@ -11,7 +11,10 @@
 </html>
 
 <script>
-  const clock = document.getElementById('clock');
+  const MILLISECONDS = 1000,
+        ONE_SECOND = MILLISECONDS,
+        ONE_MINUTE = MILLISECONDS * 60,
+        clock = document.getElementById('clock');
 
   function setTime() {
     clock.textContent = (new Date).toLocaleString(
@@ -25,5 +28,8 @@
 
   setTime();
 
-  window.setInterval(setTime, 1000);
+  window.setTimeout(
+    () => window.setInterval(setTime, 1000),
+    (ONE_MINUTE - ((new Date).getSeconds() * MILLISECONDS))
+  )
 </script>
