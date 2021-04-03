@@ -44,8 +44,8 @@
         CLOCK = document.getElementById('clock'),
         MS_TO_NEXT_MINUTE = (ONE_MINUTE_IN_MILLISECONDS - ((new Date).getSeconds() * MILLISECONDS)),
         SVG = document.getElementById('svg'),
-        SVG_VIEWBOX_ZOOM_IN = "0 0 60 18",
-        SVG_VIEWBOX_ZOOM_OUT = "0 0 51 18";
+        SMALLER_SVG = "0 0 39 18",
+        BIGGER_SVG = "0 0 31 18";
 
   function toggleFullscreen() {
     document.webkitIsFullScreen == undefined ? standardToggleFullscreen() : webkitToggleFullscreen();
@@ -61,26 +61,22 @@
   };
 
   function updateDisplayTime() {
-    const [_, ampm, time] = (new Date)
-            .toLocaleString('zh-CN', {
+    const [_wholeMatch, time, _ampm] = (new Date)
+            .toLocaleString('en-US', {
               hour: 'numeric',
               minute: 'numeric',
               hour12: true
             })
-            .match(/^(.{2})(.+)$/),
-          tspan = document.createElementNS("http://www.w3.org/2000/svg", "tspan");
+            .match(/^(\d{1,2}:\d{2})(.+)$/);
 
-    tspan.textContent = ampm;
     CLOCK.textContent = time;
     const [hours, minutes] = time.split(':')
 
     if (hours.length > 1) {
-      SVG.setAttribute('viewBox', SVG_VIEWBOX_ZOOM_IN);
+      SVG.setAttribute('viewBox', SMALLER_SVG);
     } else {
-      SVG.setAttribute('viewBox', SVG_VIEWBOX_ZOOM_OUT);
+      SVG.setAttribute('viewBox', BIGGER_SVG);
     };
-
-    CLOCK.prepend(tspan);
   };
 
   window.setTimeout(
