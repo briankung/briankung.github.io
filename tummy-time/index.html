@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8"/>
+  <title>briankung.xyz - Tummy Time Tracker</title>
+  <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
+  <style>
+  </style>
+</head>
+<body>
+  <h1>Track Tummy Time</h1>
+  <h2 id="stopwatch"></h2>
+  <button id="tracking-toggle" onclick="toggleTracking()">Start</button>
+  <ul id="entries">
+  </ul>
+</body>
+</html>
+
+<script>
+  const TRACKING_TOGGLE = document.getElementById('tracking-toggle'),
+        ENTRIES = document.getElementById('entries'),
+        STOPWATCH = document.getElementById('stopwatch'),
+        ONE_SECOND = 1000, // 1000 ms
+        ONE_MINUTE = 60 * ONE_SECOND,
+        STATE = {
+          entries: [],
+          startTime: null,
+        };
+
+  function toggleTracking() {
+    if (STATE.startTime === null) {
+      STATE.startTime = new Date();
+      TRACKING_TOGGLE.innerText = "Stop";
+    } else {
+      const { startTime } = STATE,
+            stopTime = new Date(),
+            duration = stopTime - startTime;
+
+      STATE.entries.push({startTime, duration});
+
+      STATE.startTime = null;
+
+      TRACKING_TOGGLE.innerText = 'Start';
+      const entry = document.createElement('li');
+      entry.innerText = duration;
+      ENTRIES.append(entry);
+    }
+  }
+</script>
