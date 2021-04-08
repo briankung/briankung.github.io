@@ -99,6 +99,7 @@
       TRACKING_TOGGLE.innerText = 'Start';
 
       updateEntries();
+      storeEntries();
     }
   };
 
@@ -117,5 +118,32 @@
 
     ENTRIES.innerText = '';
     ENTRIES.append(...lineItems);
+
+    TOTAL.innerText = STATE.total().humanize();
   };
+
+  function storeEntries() {
+    localStorage.setItem('entries', JSON.stringify(STATE.entries));
+  };
+
+  function loadEntries() {
+    let storedEntries = localStorage.getItem('entries');
+
+    if (storedEntries) {
+      storedEntries = JSON.parse(storedEntries);
+
+      storedEntries = storedEntries.map(({startTime, duration: {duration}}) => {
+        return {
+          startTime: new Date(startTime),
+          duration: new Duration(Date.parse(duration)),
+        };
+      });
+      STATE.entries = storedEntries;
+    } else {
+      STATE.entries = [];
+    }
+  };
+
+  loadEntries();
+  updateEntries();
 </script>
