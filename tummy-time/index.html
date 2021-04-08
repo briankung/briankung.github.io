@@ -9,22 +9,66 @@
 </head>
 <body>
   <h1>Track Tummy Time</h1>
-  <h2 id="stopwatch"></h2>
+  <h2 id="stopwatch">00:00</h2>
   <button id="tracking-toggle" onclick="toggleTracking()">Start</button>
+  <h3>Total: <span id="total">00:00</span></h3>
   <ul id="entries">
   </ul>
 </body>
 </html>
 
 <script>
+  // Have to change this function signature to Duration(duration) instead of startTime, which is
+  // fucking everything up
+  function Duration(duration) {
+    this.duration = new Date(duration);
+
+    this.toString = function() {
+      return this.duration.toLocaleString('en-US', {
+              minute: 'numeric',
+              second: 'numeric',
+              hour12: false,
+              timeZone: 'UTC',
+            });
+    }
+
+    this.add = function(b) {
+      return new Duration(this.duration.getTime() + b.duration.getTime());
+    }
+  };
+
   const TRACKING_TOGGLE = document.getElementById('tracking-toggle'),
         ENTRIES = document.getElementById('entries'),
         STOPWATCH = document.getElementById('stopwatch'),
+        TOTAL = document.getElementById('total'),
         ONE_SECOND = 1000, // 1000 ms
         ONE_MINUTE = 60 * ONE_SECOND,
         STATE = {
           entries: [],
-          startTime: null,
+          jobId: null,
+          set startTime(time) {
+            if (time === null) {
+              STOPWATCH.innerText = "00:00";
+              window.clearInterval(this.jobId);
+              this.jobId = null;
+              TOTAL.innerText = STATE.entries.reduce((a, b) => a.add(b), new Duration(0));
+            } else {
+              this.jobId = window.setInterval(
+                () => {
+                  const currentLap = new Duration((new Date()) - this._startTime)
+                  STOPWATCH.innerText = currentLap;
+                  TOTAL.innerText = STATE.entries.reduce((a, b) => a.add(b), new Duration(0)).add(currentLap);
+                },
+                ONE_SECOND
+              );
+            };
+
+            this._startTime = time;
+          },
+
+          get startTime() {
+            return this._startTime === undefined ? null : this._startTime;
+          }
         };
 
   function toggleTracking() {
@@ -34,9 +78,9 @@
     } else {
       const { startTime } = STATE,
             stopTime = new Date(),
-            duration = stopTime - startTime;
+            duration = new Duration(stopTime - startTime);
 
-      STATE.entries.push({startTime, duration});
+      STATE.entries.push({startTime, ...duration});
 
       STATE.startTime = null;
 
