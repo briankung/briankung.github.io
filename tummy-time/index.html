@@ -6,6 +6,12 @@
   <title>briankung.xyz - Tummy Time Tracker</title>
   <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
   <style>
+    body {
+      background-color: black;
+      color: white;
+      text-align: center;
+    }
+
     .delete-button {
       margin-right: 0.5em;
       user-select: none; /* standard syntax */
@@ -22,12 +28,19 @@
       right: 0;
       height: 50px;
       width: 100%;
+      background-color: gray;
+      color: white;
+    }
+
+    ul {
+      list-style-type: none;
+      text-align: left;
     }
   </style>
 </head>
 <body>
-  <h1>Track Tummy Time</h1>
-  <h2 id="stopwatch">00:00</h2>
+  <h1>Tummy Time Tracker</h1>
+  <h2>Currently: <span id="stopwatch">00:00</span></h2>
   <button id="tracking-toggle" onclick="toggleTracking()">Start</button>
   <h3>Total: <span id="total">0s</span></h3>
   <ul id="entries">
