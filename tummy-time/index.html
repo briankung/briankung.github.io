@@ -77,7 +77,8 @@
     };
 
     this.humanize = function() {
-      const { minutes, seconds: remainingSeconds } = this.minutesAndSeconds();
+      let { minutes, seconds: remainingSeconds } = this.minutesAndSeconds();
+      remainingSeconds = Math.round(remainingSeconds);
       return minutes ? `${minutes}m ${remainingSeconds}s` : `${remainingSeconds}s`;
     };
 
