@@ -79,7 +79,7 @@
           },
 
           total() {
-            return this.entries.reduce((a, b) => a.add(b), new Duration(0));
+            return this.entries.map(({duration}) => duration).reduce((a, b) => a.add(b), new Duration(0));
           }
         };
 
@@ -90,21 +90,32 @@
     } else {
       const { startTime } = STATE,
             stopTime = new Date(),
-            duration = new Duration(stopTime - startTime),
-            timestamp = startTime.toLocaleString('en-US', {
-              hour: 'numeric',
-              minute: 'numeric',
-              hour12: true
-            });
+            duration = new Duration(stopTime - startTime);
 
-      STATE.entries.push({startTime, ...duration});
+      STATE.entries.push({startTime, duration});
 
       STATE.startTime = null;
 
       TRACKING_TOGGLE.innerText = 'Start';
-      const entry = document.createElement('li');
-      entry.innerText = `${timestamp} - ${duration.humanize()}`;
-      ENTRIES.append(entry);
+
+      updateEntries();
     }
+  }
+
+  function updateEntries() {
+    const lineItems = STATE.entries.map(entry => {
+      const {startTime, duration} = entry,
+            timestamp = startTime.toLocaleString('en-US', {
+              hour: 'numeric',
+              minute: 'numeric',
+              hour12: true
+            }),
+            li = document.createElement('li');
+      li.innerText = `${timestamp} - ${duration.humanize()}`;
+      return li;
+    });
+
+    ENTRIES.innerText = '';
+    ENTRIES.append(...lineItems);
   }
 </script>
