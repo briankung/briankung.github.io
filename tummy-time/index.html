@@ -199,3 +199,17 @@
   loadEntries();
   updateEntries();
 </script>
+
+<script>
+  async function forceUpdate () {
+    if ('serviceWorker' in navigator) {
+      let registrations = await navigator.serviceWorker.getRegistrations();
+
+      for (const registration of registrations) {
+        registration.update();
+      };
+    }
+  }
+
+  (async () => await forceUpdate())()
+</script>
