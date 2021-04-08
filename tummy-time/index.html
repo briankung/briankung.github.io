@@ -5,6 +5,9 @@
   <title>briankung.xyz - Tummy Time Tracker</title>
   <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
   <style>
+    .delete-button {
+      margin-right: 0.5em;
+    }
   </style>
 </head>
 <body>
@@ -103,16 +106,36 @@
     }
   };
 
+  Array.prototype.remove = function(from, to) {
+    const rest = this.slice((to || from) + 1 || this.length);
+    this.length = from < 0 ? this.length + from : from;
+    return this.push.apply(this, rest);
+  };
+
   function updateEntries() {
-    const lineItems = STATE.entries.map(entry => {
+    const lineItems = STATE.entries.map((entry, i) => {
       const {startTime, duration} = entry,
             timestamp = startTime.toLocaleString('en-US', {
               hour: 'numeric',
               minute: 'numeric',
               hour12: true
             }),
-            li = document.createElement('li');
-      li.innerText = `${timestamp} - ${duration.humanize()}`;
+            li = document.createElement('li'),
+            deleteButton = document.createElement('span'),
+            info = document.createTextNode(`${timestamp} - ${duration.humanize()}`);
+
+      deleteButton.addEventListener('dblclick', function(e) {
+        e.preventDefault();
+        STATE.entries.remove(i);
+        updateEntries();
+        storeEntries();
+      })
+
+      deleteButton.classList.add('delete-button');
+
+      deleteButton.innerText = "🚫";
+
+      li.prepend(deleteButton, info);
       return li;
     });
 
