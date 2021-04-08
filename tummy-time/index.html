@@ -11,7 +11,7 @@
   <h1>Track Tummy Time</h1>
   <h2 id="stopwatch">00:00</h2>
   <button id="tracking-toggle" onclick="toggleTracking()">Start</button>
-  <h3>Total: <span id="total">00:00</span></h3>
+  <h3>Total: <span id="total">0s</span></h3>
   <ul id="entries">
   </ul>
 </body>
@@ -30,11 +30,19 @@
               hour12: false,
               timeZone: 'UTC',
             });
-    }
+    };
+
+    this.humanize = function() {
+      const seconds = this.duration.getTime() / ONE_SECOND,
+            minutes = Math.floor(seconds / 60),
+            remainingSeconds = Math.floor(seconds % 60);
+
+      return minutes ? `${minutes}m ${remainingSeconds}s` : `${remainingSeconds}s`;
+    };
 
     this.add = function(b) {
       return new Duration(this.duration.getTime() + b.duration.getTime());
-    }
+    };
   };
 
   const TRACKING_TOGGLE = document.getElementById('tracking-toggle'),
@@ -51,13 +59,13 @@
               STOPWATCH.innerText = "00:00";
               window.clearInterval(this.jobId);
               this.jobId = null;
-              TOTAL.innerText = STATE.entries.reduce((a, b) => a.add(b), new Duration(0));
+              TOTAL.innerText = this.total().humanize();
             } else {
               this.jobId = window.setInterval(
                 () => {
                   const currentLap = new Duration((new Date()) - this._startTime)
                   STOPWATCH.innerText = currentLap;
-                  TOTAL.innerText = STATE.entries.reduce((a, b) => a.add(b), new Duration(0)).add(currentLap);
+                  TOTAL.innerText = this.total().add(currentLap).humanize();
                 },
                 ONE_SECOND
               );
@@ -68,6 +76,10 @@
 
           get startTime() {
             return this._startTime === undefined ? null : this._startTime;
+          },
+
+          total() {
+            return this.entries.reduce((a, b) => a.add(b), new Duration(0));
           }
         };
 
@@ -78,7 +90,12 @@
     } else {
       const { startTime } = STATE,
             stopTime = new Date(),
-            duration = new Duration(stopTime - startTime);
+            duration = new Duration(stopTime - startTime),
+            timestamp = startTime.toLocaleString('en-US', {
+              hour: 'numeric',
+              minute: 'numeric',
+              hour12: true
+            });
 
       STATE.entries.push({startTime, ...duration});
 
@@ -86,7 +103,7 @@
 
       TRACKING_TOGGLE.innerText = 'Start';
       const entry = document.createElement('li');
-      entry.innerText = duration;
+      entry.innerText = `${timestamp} - ${duration.humanize()}`;
       ENTRIES.append(entry);
     }
   }
