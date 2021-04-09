@@ -298,14 +298,15 @@
       const dY = touchStart.y - touchStop.y,
             dX = touchStart.x - touchStop.x;
 
-      if (isPullDown(dY, dX)) confirm('Reload?') && window.location.reload();
+      if (isPullDown(dY, dX)) confirm('Check for update?') && window.location.reload();
   }
 
   function isPullDown(dY, dX) {
-    const isPullDownWithXYFixedPixelDiff = (Math.abs(dX) <= 100 && Math.abs(dY) >= 300),
-          isPullDownWithXYRatio = (Math.abs(dX)/Math.abs(dY) <= 0.3 && dY >= 60);
+    const [dYAbs, dXAbs] = [dY, dX].map(Math.abs),
+          isPullDownWithXYFixedPixelDiff = (dXAbs <= 100 && dYAbs >= 300),
+          isPullDownWithXYRatio = (dXAbs/dYAbs <= 0.3 && dYAbs >= 80);
 
-    return dY < 0 && (isPullDownWithXYRatio);
+    return dY < 0 && (isPullDownWithXYFixedPixelDiff || isPullDownWithXYRatio);
   }
 
   document.addEventListener('touchstart', swipeStart, false);
