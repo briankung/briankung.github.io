@@ -267,15 +267,49 @@
 </script>
 
 <script>
-  async function forceUpdate () {
-    if ('serviceWorker' in navigator) {
-      let registrations = await navigator.serviceWorker.getRegistrations();
+  // stolen from https://stackoverflow.com/a/46248086/1042144
 
-      for (const registration of registrations) {
-        registration.update();
-      };
-    }
+  const touchStart = { x: 0, y:0 };
+  const touchStop = { x:0, y:0 };
+
+  function swipeStart(e) {
+      if (typeof e['targetTouches'] !== "undefined") {
+          const touch = e.targetTouches[0];
+          touchStart.x = touch.screenX;
+          touchStart.y = touch.screenY;
+      } else {
+          touchStart.x = e.screenX;
+          touchStart.y = e.screenY;
+      }
   }
 
-  (async () => await forceUpdate())()
+  function swipeEnd(e) {
+      if (typeof e['changedTouches'] !== "undefined") {
+          const touch = e.changedTouches[0];
+          touchStop.x = touch.screenX;
+          touchStop.y = touch.screenY;
+      } else {
+          touchStop.x = e.screenX;
+          touchStop.y = e.screenY;
+      }
+
+      swipeCheck();
+  }
+
+  function swipeCheck() {
+      const changeY = touchStart.y - touchStop.y;
+      const changeX = touchStart.x - touchStop.x;
+
+      if (isPullDown(changeY, changeX) ) console.log("window.location.reload()");
+  }
+
+  function isPullDown(dY, dX) {
+      // methods of checking slope, length, direction of line created by swipe action
+      return dY < 0 && (
+          (Math.abs(dX) <= 100 && Math.abs(dY) >= 300) || (Math.abs(dX)/Math.abs(dY) <= 0.3 && dY >= 60)
+      );
+  }
+
+  document.addEventListener('touchstart', swipeStart, false);
+  document.addEventListener('touchend', swipeEnd, false);
 </script>
