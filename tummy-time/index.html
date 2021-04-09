@@ -153,85 +153,96 @@
   };
 
   function updateEntries() {
-    const lineItems = STATE.entries.map((entry, i) => {
-      const li = document.createElement('li'),
-            deleteButton = document.createElement('span'),
-            spacer = document.createTextNode(' - ');
+    const lineItems = STATE
+      .entries
+      .filter(({startTime}) => {
+        const today = new Date();
 
-      let timestamp = document.createElement('input');
-      timestamp.type = "time";
-      timestamp.value = entry.startTime.toLocaleString('en-US', {
-        hour: 'numeric',
-        minute: 'numeric',
-        hour12: false
-      });
-
-      // TODO: look into components / templates
-
-      let { minutes, seconds } = entry.duration.minutesAndSeconds();
-
-      const [minuteInput, secondInput] = [document.createElement('input'), document.createElement('input')];
-
-      minuteInput.type = secondInput.type = "number";
-      minuteInput.min = secondInput.min = 0;
-      minuteInput.max = secondInput.max = 59;
-      minuteInput.step = secondInput.step = 1;
-      minuteInput.classList.add('minutes');
-      secondInput.classList.add('seconds');
-
-      minuteInput.value = minutes;
-      secondInput.value = seconds;
-
-      //    TODO: Set up all these event listeners
-      // 👇 on the classes that you already have 😑👇
-
-      minuteInput.addEventListener('change', function(e) {
-        STATE.entries[i].duration = (
-          new Duration(
-            (this.value * ONE_MINUTE) +
-            (this.parentElement.querySelector('.seconds').value * ONE_SECOND)
-          )
+        return (
+          startTime.getFullYear() === today.getFullYear()
+          && startTime.getMonth() === today.getMonth()
+          && startTime.getDate() === today.getDate()
         );
+      })
+      .map((entry, i) => {
+        const li = document.createElement('li'),
+              deleteButton = document.createElement('span'),
+              spacer = document.createTextNode(' - ');
+
+        let timestamp = document.createElement('input');
+        timestamp.type = "time";
+        timestamp.value = entry.startTime.toLocaleString('en-US', {
+          hour: 'numeric',
+          minute: 'numeric',
+          hour12: false
+        });
+
+        // TODO: look into components / templates
+
+        let { minutes, seconds } = entry.duration.minutesAndSeconds();
+
+        const [minuteInput, secondInput] = [document.createElement('input'), document.createElement('input')];
+
+        minuteInput.type = secondInput.type = "number";
+        minuteInput.min = secondInput.min = 0;
+        minuteInput.max = secondInput.max = 59;
+        minuteInput.step = secondInput.step = 1;
+        minuteInput.classList.add('minutes');
+        secondInput.classList.add('seconds');
+
+        minuteInput.value = minutes;
+        secondInput.value = seconds;
+
+        //    TODO: Set up all these event listeners
+        // 👇 on the classes that you already have 😑👇
+
+        minuteInput.addEventListener('change', function(e) {
+          STATE.entries[i].duration = (
+            new Duration(
+              (this.value * ONE_MINUTE) +
+              (this.parentElement.querySelector('.seconds').value * ONE_SECOND)
+            )
+          );
+        });
+
+        secondInput.addEventListener('change', function(e) {
+          STATE.entries[i].duration = (
+            new Duration(
+              (this.value * ONE_SECOND) +
+              (this.parentElement.querySelector('.minutes').value * ONE_MINUTE)
+            )
+          );
+        });
+
+        minuteInput.addEventListener('change', updateEntries);
+        secondInput.addEventListener('change', updateEntries);
+
+        minuteInput.addEventListener('blur', storeEntries);
+        secondInput.addEventListener('blur', storeEntries);
+
+        function deleteRow(e) {
+          e.preventDefault();
+          STATE.entries.remove(i);
+          updateEntries();
+          storeEntries();
+        };
+
+        deleteButton.addEventListener('dblclick', deleteRow);
+
+        // 👇 TODO: Make inputs and delete button tabbable 👇
+        deleteButton.addEventListener('keyup', function(e) {
+          if (e.code === "Enter") deleteRow(e);
+        });
+
+        deleteButton.classList.add('delete-button');
+
+        deleteButton.innerText = "🚫";
+
+        [deleteButton,timestamp, minuteInput, secondInput].forEach(el => el.setAttribute('tabindex', 0));
+
+        li.prepend(deleteButton, timestamp, spacer, minuteInput, ' m', ' ', secondInput, ' s');
+        return li;
       });
-
-      secondInput.addEventListener('change', function(e) {
-        STATE.entries[i].duration = (
-          new Duration(
-            (this.value * ONE_SECOND) +
-            (this.parentElement.querySelector('.minutes').value * ONE_MINUTE)
-          )
-        );
-      });
-
-      minuteInput.addEventListener('change', updateEntries);
-      secondInput.addEventListener('change', updateEntries);
-
-      minuteInput.addEventListener('blur', storeEntries);
-      secondInput.addEventListener('blur', storeEntries);
-
-      function deleteRow(e) {
-        e.preventDefault();
-        STATE.entries.remove(i);
-        updateEntries();
-        storeEntries();
-      };
-
-      deleteButton.addEventListener('dblclick', deleteRow);
-
-      // 👇 TODO: Make inputs and delete button tabbable 👇
-      deleteButton.addEventListener('keyup', function(e) {
-        if (e.code === "Enter") deleteRow(e);
-      });
-
-      deleteButton.classList.add('delete-button');
-
-      deleteButton.innerText = "🚫";
-
-      [deleteButton,timestamp, minuteInput, secondInput].forEach(el => el.setAttribute('tabindex', 0));
-
-      li.prepend(deleteButton, timestamp, spacer, minuteInput, ' m', ' ', secondInput, ' s');
-      return li;
-    });
 
     ENTRIES.innerText = '';
     ENTRIES.append(...lineItems);
@@ -247,14 +258,14 @@
     let storedEntries = localStorage.getItem('entries');
 
     if (storedEntries) {
-      storedEntries = JSON.parse(storedEntries);
-
-      storedEntries = storedEntries.map(({startTime, duration: {duration}}) => {
-        return {
-          startTime: new Date(startTime),
-          duration: new Duration(Date.parse(duration)),
-        };
-      });
+      storedEntries = JSON
+        .parse(storedEntries)
+        .map(({startTime, duration: {duration}}) => {
+          return {
+            startTime: new Date(startTime),
+            duration: new Duration(Date.parse(duration)),
+          };
+        });
       STATE.entries = storedEntries;
     } else {
       STATE.entries = [];
