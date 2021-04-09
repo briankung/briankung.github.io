@@ -73,7 +73,7 @@
         minutes = Math.floor(seconds / 60),
         remainingSeconds = Math.floor(seconds % 60);
 
-      return { minutes, seconds };
+      return { minutes, seconds: remainingSeconds };
     };
 
     this.humanize = function() {
@@ -181,40 +181,52 @@
       minuteInput.value = minutes;
       secondInput.value = seconds;
 
-      minuteInput.addEventListener('change', function() {
+      //    TODO: Set up all these event listeners
+      // 👇 on the classes that you already have 😑👇
+
+      minuteInput.addEventListener('change', function(e) {
         STATE.entries[i].duration = (
           new Duration(
             (this.value * ONE_MINUTE) +
             (this.parentElement.querySelector('.seconds').value * ONE_SECOND)
           )
         );
-
-        storeEntries()
-        updateEntries();
       });
 
-      secondInput.addEventListener('change', function() {
+      secondInput.addEventListener('change', function(e) {
         STATE.entries[i].duration = (
           new Duration(
             (this.value * ONE_SECOND) +
             (this.parentElement.querySelector('.minutes').value * ONE_MINUTE)
           )
         );
-
-        storeEntries()
-        updateEntries();
       });
 
-      deleteButton.addEventListener('dblclick', function(e) {
+      minuteInput.addEventListener('change', updateEntries);
+      secondInput.addEventListener('change', updateEntries);
+
+      minuteInput.addEventListener('blur', storeEntries);
+      secondInput.addEventListener('blur', storeEntries);
+
+      function deleteRow(e) {
         e.preventDefault();
         STATE.entries.remove(i);
         updateEntries();
         storeEntries();
-      })
+      };
+
+      deleteButton.addEventListener('dblclick', deleteRow);
+
+      // 👇 TODO: Make inputs and delete button tabbable 👇
+      deleteButton.addEventListener('keyup', function(e) {
+        if (e.code === "Enter") deleteRow(e);
+      });
 
       deleteButton.classList.add('delete-button');
 
       deleteButton.innerText = "🚫";
+
+      [deleteButton,timestamp, minuteInput, secondInput].forEach(el => el.setAttribute('tabindex', 0));
 
       li.prepend(deleteButton, timestamp, spacer, minuteInput, ' m', ' ', secondInput, ' s');
       return li;
