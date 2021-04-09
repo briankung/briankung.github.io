@@ -49,7 +49,7 @@
 <body>
   <h1>Tummy Time Tracker</h1>
   <h2>Currently: <span id="stopwatch">00:00</span></h2>
-  <button id="tracking-toggle" onclick="toggleTracking()">Start</button>
+  <button id="tracking-toggle" onclick="toggleTracking()">Start 🟢</button>
   <h3>Total: <span id="total">0s</span></h3>
   <ul id="entries">
   </ul>
@@ -129,7 +129,7 @@
   function toggleTracking() {
     if (STATE.startTime === null) {
       STATE.startTime = new Date();
-      TRACKING_TOGGLE.innerText = "Stop";
+      TRACKING_TOGGLE.innerText = "Stop 🛑";
     } else {
       const { startTime } = STATE,
             stopTime = new Date(),
@@ -139,7 +139,7 @@
 
       STATE.startTime = null;
 
-      TRACKING_TOGGLE.innerText = 'Start';
+      TRACKING_TOGGLE.innerText = 'Start 🟢';
 
       updateEntries();
       storeEntries();
