@@ -300,7 +300,7 @@
       const changeY = touchStart.y - touchStop.y;
       const changeX = touchStart.x - touchStop.x;
 
-      if (isPullDown(changeY, changeX) ) console.log("window.location.reload()");
+      if (isPullDown(changeY, changeX) ) window.location.reload();
   }
 
   function isPullDown(dY, dX) {
