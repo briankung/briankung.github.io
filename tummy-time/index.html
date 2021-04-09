@@ -269,45 +269,43 @@
 <script>
   // stolen from https://stackoverflow.com/a/46248086/1042144
 
-  const touchStart = { x: 0, y:0 };
-  const touchStop = { x:0, y:0 };
+  let touchStart = { x: 0, y: 0 },
+      touchStop = { x: 0, y: 0 };
 
   function swipeStart(e) {
       if (typeof e['targetTouches'] !== "undefined") {
-          const touch = e.targetTouches[0];
-          touchStart.x = touch.screenX;
-          touchStart.y = touch.screenY;
+          const { screenX: x, screenY: y } = e.targetTouches[0];
+          touchStart = { x, y }
       } else {
-          touchStart.x = e.screenX;
-          touchStart.y = e.screenY;
+          const { screenX: x, screenY: y } = e;
+          touchStart = { x, y }
       }
   }
 
   function swipeEnd(e) {
       if (typeof e['changedTouches'] !== "undefined") {
-          const touch = e.changedTouches[0];
-          touchStop.x = touch.screenX;
-          touchStop.y = touch.screenY;
+          const { screenX: x, screenY: y } = e.changedTouches[0];
+          touchStop = { x, y };
       } else {
-          touchStop.x = e.screenX;
-          touchStop.y = e.screenY;
+          const { screenX: x, screenY: y } = e;
+          touchStop = { x, y };
       }
 
       swipeCheck();
   }
 
   function swipeCheck() {
-      const changeY = touchStart.y - touchStop.y;
-      const changeX = touchStart.x - touchStop.x;
+      const dY = touchStart.y - touchStop.y,
+            dX = touchStart.x - touchStop.x;
 
-      if (isPullDown(changeY, changeX) ) window.location.reload();
+      if (isPullDown(dY, dX)) confirm('Reload?') && window.location.reload();
   }
 
   function isPullDown(dY, dX) {
-      // methods of checking slope, length, direction of line created by swipe action
-      return dY < 0 && (
-          (Math.abs(dX) <= 100 && Math.abs(dY) >= 300) || (Math.abs(dX)/Math.abs(dY) <= 0.3 && dY >= 60)
-      );
+    const isPullDownWithXYFixedPixelDiff = (Math.abs(dX) <= 100 && Math.abs(dY) >= 300),
+          isPullDownWithXYRatio = (Math.abs(dX)/Math.abs(dY) <= 0.3 && dY >= 60);
+
+    return dY < 0 && (isPullDownWithXYRatio);
   }
 
   document.addEventListener('touchstart', swipeStart, false);
