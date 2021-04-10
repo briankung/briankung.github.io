@@ -50,7 +50,6 @@
 
   function toggleFullscreen() {
     document.webkitIsFullScreen == undefined ? standardToggleFullscreen() : webkitToggleFullscreen();
-    NO_SLEEP.enabled ? NO_SLEEP.disable() : NO_SLEEP.enable();
   };
 
   function webkitToggleFullscreen() {
@@ -89,4 +88,5 @@
   );
 
   updateDisplayTime();
+  NO_SLEEP.enable();
 </script>
