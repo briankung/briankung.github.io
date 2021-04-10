@@ -71,8 +71,8 @@
 
     this.minutesAndSeconds = function () {
       const seconds = this.duration.getTime() / ONE_SECOND,
-        minutes = Math.floor(seconds / 60),
-        remainingSeconds = Math.floor(seconds % 60);
+            minutes = Math.floor(seconds / 60),
+            remainingSeconds = Math.floor(seconds % 60);
 
       return { minutes, seconds: remainingSeconds };
     };
