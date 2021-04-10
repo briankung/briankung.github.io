@@ -49,6 +49,7 @@
         BIGGER_SVG = "0 0 31 18";
 
   function toggleFullscreen() {
+    NO_SLEEP.enable();
     document.webkitIsFullScreen == undefined ? standardToggleFullscreen() : webkitToggleFullscreen();
   };
 
@@ -88,7 +89,6 @@
   );
 
   updateDisplayTime();
-  NO_SLEEP.enable();
 </script>
 
  <script src="../src/pulldown.js"></script>
