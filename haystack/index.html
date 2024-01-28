@@ -17,7 +17,7 @@
     </div>
     <button onclick="findNeedles()">Find Needles</button>
     <h2>Results:</h2>
-    <ul id="results"></ul>
+    <ol id="results"></ol>
     <script>
         window.onload = function () {
             document.getElementById('haystack').value = sessionStorage.getItem('haystack') || '';
@@ -48,5 +48,4 @@
         }
     </script>
 </body>
-
 </html>
