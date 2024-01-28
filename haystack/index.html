@@ -21,8 +21,8 @@
             var haystack = document.getElementById("haystack").value;
             var needles = document.getElementById("needles").value;
 
-            haystack = haystack.trim().split(/\s+/);
-            needles = needles.trim().split(/\s+/);
+            haystack = haystack.trim().split(" ").map((i) => i.trim());
+            needles = needles.trim().split(" ").map((i) => i.trim());
 
             var foundNeedles = needles.filter(value => haystack.includes(value));
 
