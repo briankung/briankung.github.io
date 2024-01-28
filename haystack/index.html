@@ -30,10 +30,24 @@
 
             function findNeedles() {
                 var haystack = document.getElementById("haystack").value;
-                var needles = document.getElementById("needles").value;
+                var needles_text = document.getElementById("needles").value;
 
                 haystack = haystack.trim().split(/\s+/);
-                needles = needles.trim().split(/\s+/);
+
+                var needles = [];
+                if (needles_text.includes(',')) {
+                    var needle_lines = needles_text.trim().split('\n');
+                    needle_lines.forEach(function (line) {
+                        if (line.includes(',')) {
+                            var cols = line.split(',');
+                            needles.push(cols[0].trim());
+                        } else {
+                            needles.push(line)
+                        }
+                    });
+                } else {
+                    needles = needles_text.trim().split(/\s+/);
+                }
 
                 var foundNeedles = needles.filter(value => haystack.includes(value));
 
@@ -42,10 +56,13 @@
 
                 for (let i = 0; i < foundNeedles.length; i++) {
                     var li = document.createElement('li');
-                    li.appendChild(document.createTextNode(foundNeedles[i]));
+                    var id = foundNeedles[i];
+                    var needle = needles_text.split('\n').find(n => n.startsWith(id)).trim();
+                    li.appendChild(document.createTextNode(`${needle}`));
                     results.appendChild(li);
                 }
             }
         </script>
     </body>
+
 </html>
