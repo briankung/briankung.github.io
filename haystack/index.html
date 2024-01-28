@@ -9,11 +9,11 @@
 <body>
     <div>
         <label for="haystack">Haystack:</label><br>
-        <textarea id="haystack" rows="4" cols="50"></textarea>
+        <textarea id="haystack" rows="4" cols="50" oninput="saveToSession('haystack', this.value)"></textarea>
     </div>
     <div>
         <label for="needles">Needles:</label><br>
-        <textarea id="needles" rows="4" cols="50"></textarea>
+        <textarea id="needles" rows="4" cols="50" oninput="saveToSession('needles', this.value)"></textarea>
     </div>
     <button onclick="findNeedles()">Find Needles</button>
     <h2>Results:</h2>
@@ -24,12 +24,13 @@
             document.getElementById('needles').value = sessionStorage.getItem('needles') || '';
         };
 
+        function saveToSession(id, value) {
+            sessionStorage.setItem(id, value);
+        }
+
         function findNeedles() {
             var haystack = document.getElementById("haystack").value;
             var needles = document.getElementById("needles").value;
-
-            sessionStorage.setItem('haystack', haystack);
-            sessionStorage.setItem('needles', needles);
 
             haystack = haystack.trim().split(/\s+/);
             needles = needles.trim().split(/\s+/);
@@ -47,4 +48,5 @@
         }
     </script>
 </body>
+
 </html>
