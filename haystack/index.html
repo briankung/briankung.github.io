@@ -1,9 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <title>Needle Finder</title>
 </head>
+
 <body>
     <div>
         <label for="haystack">Haystack:</label><br>
@@ -15,11 +17,19 @@
     </div>
     <button onclick="findNeedles()">Find Needles</button>
     <h2>Results:</h2>
-    <ol id="results"></ol>
+    <ul id="results"></ul>
     <script>
+        window.onload = function () {
+            document.getElementById('haystack').value = sessionStorage.getItem('haystack') || '';
+            document.getElementById('needles').value = sessionStorage.getItem('needles') || '';
+        };
+
         function findNeedles() {
             var haystack = document.getElementById("haystack").value;
             var needles = document.getElementById("needles").value;
+
+            sessionStorage.setItem('haystack', haystack);
+            sessionStorage.setItem('needles', needles);
 
             haystack = haystack.trim().split(/\s+/);
             needles = needles.trim().split(/\s+/);
@@ -29,7 +39,7 @@
             var results = document.getElementById("results");
             results.innerHTML = ''; // clear previous results
 
-            for(let i=0; i < foundNeedles.length; i++) {
+            for (let i = 0; i < foundNeedles.length; i++) {
                 var li = document.createElement('li');
                 li.appendChild(document.createTextNode(foundNeedles[i]));
                 results.appendChild(li);
