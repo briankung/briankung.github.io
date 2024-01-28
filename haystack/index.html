@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Needle Finder</title>
+</head>
+<body>
+    <div>
+        <label for="haystack">Haystack:</label><br>
+        <textarea id="haystack" rows="4" cols="50"></textarea>
+    </div>
+    <div>
+        <label for="needles">Needles:</label><br>
+        <textarea id="needles" rows="4" cols="50"></textarea>
+    </div>
+    <button onclick="findNeedles()">Find Needles</button>
+    <h2>Results:</h2>
+    <ul id="results"></ul>
+    <script>
+        function findNeedles() { 
+            var haystack = document.getElementById("haystack").value;
+            var needles = document.getElementById("needles").value;
+        
+            haystack = haystack.trim().split(/\s+/);  
+            needles = needles.trim().split(/\s+/);
+
+            var foundNeedles = needles.filter(value => haystack.includes(value));
+
+            var results = document.getElementById("results");
+            results.innerHTML = ''; // clear previous results
+            
+            for(let i=0; i < foundNeedles.length; i++) {
+                var li = document.createElement('li');
+                li.appendChild(document.createTextNode(foundNeedles[i]));
+                results.appendChild(li);
+            }
+        }
+    </script>
+</body>
+</html>
