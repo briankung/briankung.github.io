@@ -29,17 +29,18 @@
             }
 
             function findNeedles() {
-                var haystack = document.getElementById("haystack").value;
-                var needles_text = document.getElementById("needles").value;
+                let haystack = document.getElementById("haystack").value;
+                let needles_text = document.getElementById("needles").value;
 
                 haystack = haystack.trim().split(/\s+/);
 
-                var needles = [];
+                let needles = [];
+
                 if (needles_text.includes(',')) {
-                    var needle_lines = needles_text.trim().split('\n');
+                    let needle_lines = needles_text.trim().split('\n');
                     needle_lines.forEach(function (line) {
                         if (line.includes(',')) {
-                            var cols = line.split(',');
+                            let cols = line.split(',');
                             needles.push(cols[0].trim());
                         } else {
                             needles.push(line)
@@ -49,15 +50,15 @@
                     needles = needles_text.trim().split(/\s+/);
                 }
 
-                var foundNeedles = needles.filter(value => haystack.includes(value));
+                let foundNeedles = needles.filter(value => haystack.includes(value));
 
-                var results = document.getElementById("results");
+                let results = document.getElementById("results");
                 results.innerHTML = ''; // clear previous results
 
                 for (let i = 0; i < foundNeedles.length; i++) {
-                    var li = document.createElement('li');
-                    var id = foundNeedles[i];
-                    var needle = needles_text.split('\n').find(n => n.startsWith(id)).trim();
+                    let li = document.createElement('li');
+                    let id = foundNeedles[i];
+                    let needle = needles_text.split('\n').find(n => n.startsWith(id)).trim();
                     li.appendChild(document.createTextNode(`${needle}`));
                     results.appendChild(li);
                 }
