@@ -89,45 +89,49 @@
         <input type="number" id="dollarPerKwh" step="0.0001" placeholder="e.g., 0.15" value="0.1518">
     </div>
     
-    <button onclick="calculate()">Calculate Savings</button>
     
     <div id="results" class="hidden">
         <h2>Your EV Savings</h2>
-        
-        <h3>Current Savings</h3>
+
+        <h3 id="periodSavingsHeading">Current Savings</h3>
         <p>Electricity used: <span id="kwhUsed"></span> kWh</p>
         <p>Electricity cost: $<span id="electricityCost"></span></p>
         <p>Gas that would have been used: <span id="gallonsUsed"></span> gallons</p>
         <p>Gas cost: $<span id="gasCost"></span></p>
         <p><strong>Total savings: $<span id="costSavings"></span></strong></p>
-        
-        <h3>Carbon Offset</h3>
+
+        <h3 id="periodCarbonHeading">Carbon Offset</h3>
         <p>EV emissions: <span id="evEmissions"></span> kg CO₂</p>
         <p>Gas car emissions: <span id="gasEmissions"></span> kg CO₂</p>
         <p><strong>Carbon offset: <span id="carbonOffset"></span> kg CO₂</strong></p>
-        
-        <h3>Projected Annual Savings</h3>
+
+        <h3 id="annualSavingsHeading">Projected Annual Savings</h3>
         <p>Days in calculation period: <span id="daysPeriod"></span></p>
         <p>Daily average miles: <span id="dailyMiles"></span></p>
-        <p>Projected annual mileage: <span id="annualMiles"></span></p>
-        <p>Projected annual electricity cost: $<span id="annualElectricityCost"></span></p>
-        <p>Projected annual gas cost: $<span id="annualGasCost"></span></p>
-        <p><strong>Projected annual savings: $<span id="annualSavings"></span></strong></p>
-        
-        <h3>Projected Annual Carbon Offset</h3>
-        <p>Projected annual EV emissions: <span id="annualEvEmissions"></span> kg CO₂</p>
-        <p>Projected annual gas car emissions: <span id="annualGasEmissions"></span> kg CO₂</p>
-        <p><strong>Projected annual carbon offset: <span id="annualCarbonOffset"></span> kg CO₂ (<span id="annualCarbonOffsetTons"></span> metric tons)</strong></p>
+        <p><span id="annualMilesLabel">Projected annual</span> mileage: <span id="annualMiles"></span></p>
+        <p><span id="annualElectricityCostLabel">Projected annual</span> electricity cost: $<span id="annualElectricityCost"></span></p>
+        <p><span id="annualGasCostLabel">Projected annual</span> gas cost: $<span id="annualGasCost"></span></p>
+        <p><strong><span id="annualSavingsLabel">Projected annual</span> savings: $<span id="annualSavings"></span></strong></p>
+
+        <h3 id="annualCarbonHeading">Projected Annual Carbon Offset</h3>
+        <p><span id="annualEvEmissionsLabel">Projected annual</span> EV emissions: <span id="annualEvEmissions"></span> kg CO₂</p>
+        <p><span id="annualGasEmissionsLabel">Projected annual</span> gas car emissions: <span id="annualGasEmissions"></span> kg CO₂</p>
+        <p><strong><span id="annualCarbonOffsetLabel">Projected annual</span> carbon offset: <span id="annualCarbonOffset"></span> kg CO₂ (<span id="annualCarbonOffsetTons"></span> metric tons)</strong></p>
     </div>
     
     <script>
-        // Set default end date to current date
+        // Set default end date to current date, then wire up live calculation
         document.addEventListener('DOMContentLoaded', function() {
             const today = new Date();
             const year = today.getFullYear();
             const month = String(today.getMonth() + 1).padStart(2, '0');
             const day = String(today.getDate()).padStart(2, '0');
             document.getElementById('endDate').value = `${year}-${month}-${day}`;
+
+            document.querySelectorAll('input').forEach(input => {
+                input.addEventListener('input', calculate);
+            });
+            calculate();
         });
         
         function calculate() {
@@ -174,29 +178,50 @@
             const annualCarbonOffset = annualGasEmissions - annualEvEmissions;
             const annualCarbonOffsetTons = annualCarbonOffset / 1000;
             
+            // Determine whether period is >= 1 year
+            const multiYear = daysDiff >= 365;
+            const periodLabel = multiYear
+                ? `Total for Full Period (${daysDiff} days)`
+                : 'Current Savings';
+            const annualLabel = multiYear ? 'Annual Average' : 'Projected Annual';
+
+            // Update section headings and inline labels
+            document.getElementById('periodSavingsHeading').textContent = periodLabel;
+            document.getElementById('periodCarbonHeading').textContent = multiYear
+                ? 'Total Carbon Offset for Full Period'
+                : 'Carbon Offset';
+            document.getElementById('annualSavingsHeading').textContent = `${annualLabel} Savings`;
+            document.getElementById('annualCarbonHeading').textContent = `${annualLabel} Carbon Offset`;
+
+            ['annualMilesLabel', 'annualElectricityCostLabel', 'annualGasCostLabel',
+             'annualSavingsLabel', 'annualEvEmissionsLabel', 'annualGasEmissionsLabel',
+             'annualCarbonOffsetLabel'].forEach(id => {
+                document.getElementById(id).textContent = annualLabel;
+            });
+
             // Display results
             document.getElementById('kwhUsed').textContent = kwhUsed.toFixed(2);
             document.getElementById('electricityCost').textContent = electricityCost.toFixed(2);
             document.getElementById('gallonsUsed').textContent = gallonsUsed.toFixed(2);
             document.getElementById('gasCost').textContent = gasCost.toFixed(2);
             document.getElementById('costSavings').textContent = costSavings.toFixed(2);
-            
+
             document.getElementById('evEmissions').textContent = evEmissions.toFixed(2);
             document.getElementById('gasEmissions').textContent = gasEmissions.toFixed(2);
             document.getElementById('carbonOffset').textContent = carbonOffset.toFixed(2);
-            
+
             document.getElementById('daysPeriod').textContent = daysDiff;
             document.getElementById('dailyMiles').textContent = dailyMiles.toFixed(2);
             document.getElementById('annualMiles').textContent = annualMiles.toFixed(0);
             document.getElementById('annualElectricityCost').textContent = annualElectricityCost.toFixed(2);
             document.getElementById('annualGasCost').textContent = annualGasCost.toFixed(2);
             document.getElementById('annualSavings').textContent = annualSavings.toFixed(2);
-            
+
             document.getElementById('annualEvEmissions').textContent = annualEvEmissions.toFixed(2);
             document.getElementById('annualGasEmissions').textContent = annualGasEmissions.toFixed(2);
             document.getElementById('annualCarbonOffset').textContent = annualCarbonOffset.toFixed(2);
             document.getElementById('annualCarbonOffsetTons').textContent = annualCarbonOffsetTons.toFixed(2);
-            
+
             // Show results
             document.getElementById('results').classList.remove('hidden');
         }
