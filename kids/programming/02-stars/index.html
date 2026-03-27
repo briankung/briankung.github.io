@@ -4,113 +4,13 @@
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Stars &#8212; Code Playground</title>
+  <link rel="stylesheet" href="../shared/lesson.css">
   <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
-    body { overflow: hidden; background: #000; }
-    canvas { display: block; }
-
-    #back {
-      position: fixed;
-      top: 12px;
-      left: 14px;
-      color: rgba(255,255,255,0.6);
-      text-decoration: none;
-      font: 13px monospace;
-      background: rgba(0,0,0,0.45);
-      padding: 4px 10px;
-      border-radius: 6px;
-      z-index: 10;
+    :root {
+      --theme: #f6ad55;
+      --theme-hover: #ed8936;
+      --theme-text: #744210;
     }
-    #back:hover { color: white; }
-
-    #panel {
-      position: fixed;
-      bottom: 0;
-      left: 0;
-      right: 0;
-      background: rgba(255, 255, 255, 0.96);
-      border-top: 3px solid #f6ad55;
-      box-shadow: 0 -4px 24px rgba(0,0,0,0.18);
-      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
-      transition: transform 0.3s ease;
-      z-index: 10;
-    }
-    #panel.collapsed { transform: translateY(calc(100% - 42px)); }
-
-    #panel-bar {
-      height: 42px;
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      padding: 0 14px;
-    }
-    #panel-bar-title {
-      font-size: 0.95rem;
-      font-weight: 700;
-      color: #2d3748;
-    }
-    #panel-toggle {
-      background: none;
-      border: 1px solid #e2e8f0;
-      border-radius: 6px;
-      cursor: pointer;
-      font: 12px monospace;
-      color: #718096;
-      padding: 3px 9px;
-    }
-    #panel-toggle:hover { background: #f7fafc; }
-
-    #panel-body { padding: 0 16px 16px; }
-
-    #editor {
-      width: 100%;
-      height: 160px;
-      font: 13px/1.6 monospace;
-      background: #1a202c;
-      color: #e2e8f0;
-      border: 1px solid #4a5568;
-      border-radius: 8px;
-      padding: 10px 12px;
-      resize: vertical;
-      outline: none;
-      tab-size: 2;
-      -moz-tab-size: 2;
-    }
-    #btn-row { display: flex; gap: 8px; margin-top: 10px; align-items: center; }
-    #run-btn {
-      background: #f6ad55;
-      color: #744210;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 18px;
-      font-size: 0.875rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    #run-btn:hover { background: #ed8936; color: white; }
-    #stop-btn {
-      background: #e2e8f0;
-      color: #4a5568;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 14px;
-      font-size: 0.875rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    #stop-btn:hover { background: #cbd5e0; }
-    #error { margin-top: 6px; font: 12px/1.4 monospace; color: #e53e3e; min-height: 16px; }
-    #print-btn {
-      background: #f6ad55;
-      color: #744210;
-      border: none;
-      border-radius: 8px;
-      padding: 8px 18px;
-      font-size: 0.875rem;
-      font-weight: 600;
-      cursor: pointer;
-    }
-    #print-btn:hover { background: #ed8936; color: white; }
   </style>
 </head>
 <body>
@@ -118,6 +18,7 @@
 <a id="back" href="../">&larr; gallery</a>
 
 <div id="panel">
+  <div id="panel-handle"></div>
   <div id="panel-bar">
     <span id="panel-bar-title">Lesson 02 &mdash; Stars</span>
     <button id="panel-toggle" onclick="togglePanel()">hide &#9660;</button>
@@ -133,20 +34,8 @@
   </div>
 </div>
 
+<script src="../shared/lesson.js"></script>
 <script>
-// ── Canvas & resize ──────────────────────────────────────────────────────
-var canvas = document.getElementById('canvas');
-var ctx = canvas.getContext('2d');
-
-function resize() {
-  canvas.width = window.innerWidth;
-  canvas.height = window.innerHeight;
-  window.WIDTH = canvas.width;
-  window.HEIGHT = canvas.height;
-  if (!_loopId) drawPlaceholder();
-}
-window.addEventListener('resize', resize);
-
 function drawPlaceholder() {
   ctx.fillStyle = '#000';
   ctx.fillRect(0, 0, WIDTH, HEIGHT);
@@ -171,90 +60,7 @@ function drawPlaceholder() {
   ctx.fillText('type code in the editor below and click Run!', WIDTH / 2, HEIGHT / 2 + 18);
   ctx.restore();
 }
-
-// ── Primitives (available in the browser console) ────────────────────────
-
-window.clear = function(color) {
-  ctx.fillStyle = color || '#000';
-  ctx.fillRect(0, 0, WIDTH, HEIGHT);
-};
-
-window.circle = function(x, y, r, color) {
-  ctx.beginPath();
-  ctx.arc(x, y, Math.max(0, r), 0, Math.PI * 2);
-  ctx.fillStyle = color || 'white';
-  ctx.fill();
-};
-
-window.rect = function(x, y, w, h, color) {
-  ctx.fillStyle = color || 'white';
-  ctx.fillRect(x, y, w, h);
-};
-
-window.line = function(x1, y1, x2, y2, color, lineWidth) {
-  ctx.beginPath();
-  ctx.moveTo(x1, y1);
-  ctx.lineTo(x2, y2);
-  ctx.strokeStyle = color || 'white';
-  ctx.lineWidth = lineWidth || 1;
-  ctx.stroke();
-};
-
-window.text = function(str, x, y, color, size) {
-  ctx.fillStyle = color || 'white';
-  ctx.font = (size || 16) + 'px monospace';
-  ctx.fillText(str, x, y);
-};
-
-window.ring = function(x, y, r, color, lineWidth) {
-  ctx.beginPath();
-  ctx.arc(x, y, Math.max(0, r), 0, Math.PI * 2);
-  ctx.strokeStyle = color || 'white';
-  ctx.lineWidth = lineWidth || 1;
-  ctx.stroke();
-};
-
-var _loopId = null;
-
-window.loop = function(fn) {
-  if (_loopId) cancelAnimationFrame(_loopId);
-  function step() { fn(); _loopId = requestAnimationFrame(step); }
-  _loopId = requestAnimationFrame(step);
-};
-
-window.stop = function() {
-  if (_loopId) { cancelAnimationFrame(_loopId); _loopId = null; }
-};
-
-window.random = function(min, max) {
-  return min + Math.random() * (max - min);
-};
-
-window.ctx = ctx;
-
 resize();
-
-// ── Panel ────────────────────────────────────────────────────────────────
-var panelCollapsed = false;
-function togglePanel() {
-  panelCollapsed = !panelCollapsed;
-  document.getElementById('panel').classList.toggle('collapsed', panelCollapsed);
-  document.getElementById('panel-toggle').innerHTML =
-    panelCollapsed ? 'show &#9650;' : 'hide &#9660;';
-}
-
-// ── Print view ───────────────────────────────────────────────────────────
-function escHtml(s) {
-  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-}
-
-function colorCode(raw) {
-  return raw.split('\n').map(function(line) {
-    var t = line.trim();
-    if (t.startsWith('//')) return '<span class="cmt">' + escHtml(line) + '</span>';
-    return escHtml(line);
-  }).join('\n');
-}
 
 var CODE_STEP1 = [
 "// This makes a list to hold all our stars",
@@ -294,63 +100,24 @@ var CODE_STEP2 = [
 "});"
 ].join('\n');
 
-// ── Editor ───────────────────────────────────────────────────────────────
-function runCode() {
-  stop();
-  document.getElementById('error').textContent = '';
-  try {
-    eval(document.getElementById('editor').value);
-  } catch(e) {
-    document.getElementById('error').textContent = e.message;
-  }
-}
-
-document.getElementById('editor').addEventListener('keydown', function(e) {
-  if (e.key === 'Tab') {
-    e.preventDefault();
-    var start = this.selectionStart;
-    this.value = this.value.substring(0, start) + '  ' + this.value.substring(start);
-    this.selectionStart = this.selectionEnd = start + 2;
-  }
-  if ((e.metaKey || e.ctrlKey) && e.key === 'Enter') {
-    e.preventDefault();
-    runCode();
-  }
-});
-
 function printCode() {
-  var w = window.open('', '_blank');
-  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8">'
-    + '<title>Stars \u2014 Code Playground</title><style>'
-    + 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;max-width:680px;margin:0 auto;padding:2rem;color:#2d3748}'
-    + 'h1{font-size:2rem;color:#d97706;margin-bottom:.2rem}'
-    + '.sub{color:#718096;margin-bottom:1.5rem;font-size:.95rem}'
-    + 'h2{font-size:.95rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#a0aec0;margin:1.5rem 0 .5rem}'
-    + 'pre{background:#1a202c;color:#e2e8f0;padding:1.1rem 1.25rem;border-radius:10px;font:14px/1.75 monospace;white-space:pre-wrap;word-break:break-word}'
-    + '.cmt{color:#68d391}'
-    + '.try{background:#fffbeb;border-left:4px solid #f6ad55;padding:1rem 1.25rem;border-radius:0 10px 10px 0;margin-top:1.5rem}'
-    + '.try h2{color:#d97706;font-size:1.1rem;text-transform:none;letter-spacing:0;margin-top:0}'
-    + '.try ol{padding-left:1.25rem;line-height:2.1;color:#744210}'
-    + '.try code{background:#fef3c7;padding:1px 5px;border-radius:4px;font:13px monospace}'
-    + '.print-btn{margin-top:1.5rem;background:#f6ad55;color:#744210;border:none;border-radius:8px;padding:8px 20px;font-size:.9rem;font-weight:600;cursor:pointer}'
-    + '@media print{.print-btn{display:none}}'
-    + '</style></head><body>'
-    + '<h1>Stars</h1>'
-    + '<p class="sub">Type this into your browser\'s console to zoom through a starfield in outer space!</p>'
-    + '<h2>Step 1 &mdash; Create the stars</h2>'
-    + '<pre>' + colorCode(CODE_STEP1) + '</pre>'
-    + '<h2>Step 2 &mdash; Animate!</h2>'
-    + '<pre>' + colorCode(CODE_STEP2) + '</pre>'
-    + '<div class="try"><h2>&#128295; Try changing these things!</h2><ol>'
-    + '<li>Change <code>100</code> to <code>300</code> for a super dense starfield</li>'
-    + '<li>Make the stars move faster: change <code>random(1, 5)</code> to <code>random(3, 10)</code></li>'
-    + '<li>Change <code>\'white\'</code> to <code>\'cyan\'</code> for blue stars, or <code>\'gold\'</code> for golden ones</li>'
-    + '<li>Change <code>s.x -= s.speed</code> to <code>s.x += s.speed</code> to fly the other way!</li>'
-    + '<li>Try changing <code>\'black\'</code> to <code>\'midnightblue\'</code> for a deep space look</li>'
-    + '</ol></div>'
-    + '<button class="print-btn" onclick="window.print()">🖨️ Print this page</button>'
-    + '</body></html>');
-  w.document.close();
+  buildPrintPage({
+    title: 'Stars',
+    subtitle: "Type this into your browser's console to zoom through a starfield in outer space!",
+    h1Color: '#d97706',
+    tryBg: '#fffbeb', tryBorder: '#f6ad55', tryH2Color: '#d97706', tryOlColor: '#744210', tryCodeBg: '#fef3c7',
+    btnBg: '#f6ad55', btnColor: '#744210',
+    step1Label: 'Create the stars',
+    step2Label: 'Animate!',
+    code1: CODE_STEP1, code2: CODE_STEP2,
+    tries: [
+      'Change <code>100</code> to <code>300</code> for a super dense starfield',
+      'Make the stars move faster: change <code>random(1, 5)</code> to <code>random(3, 10)</code>',
+      'Change <code>\'white\'</code> to <code>\'cyan\'</code> for blue stars, or <code>\'gold\'</code> for golden ones',
+      'Change <code>s.x -= s.speed</code> to <code>s.x += s.speed</code> to fly the other way!',
+      'Try changing <code>\'black\'</code> to <code>\'midnightblue\'</code> for a deep space look'
+    ]
+  });
 }
 </script>
 </body>
