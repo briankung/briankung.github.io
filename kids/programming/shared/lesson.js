@@ -72,6 +72,29 @@ window.ctx = ctx;
 // NOTE: resize() is not called here — each lesson calls it after defining drawPlaceholder()
 
 // ── Panel ────────────────────────────────────────────────────────────────
+// Relabel the print button and add an onboarding hint so it's clear
+// that printing the code sheet is the first step.
+(function() {
+  var btn = document.getElementById('print-btn');
+  if (btn) btn.innerHTML = '🖨️ Print Code Sheet';
+
+  var hint = document.createElement('p');
+  hint.id = 'panel-hint';
+  hint.innerHTML = '<strong>First time?</strong> Click <strong>Print Code Sheet</strong> to get the code, then type it in here and click <strong>Run</strong>!';
+  var body = document.getElementById('panel-body');
+  if (body) body.insertBefore(hint, body.firstChild);
+
+  var editor = document.getElementById('editor');
+  if (editor) {
+    editor.addEventListener('input', function() {
+      if (editor.value.trim()) {
+        var h = document.getElementById('panel-hint');
+        if (h) h.style.display = 'none';
+      }
+    });
+  }
+})();
+
 var panelCollapsed = false;
 
 (function() {

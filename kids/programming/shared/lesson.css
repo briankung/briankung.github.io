@@ -83,6 +83,17 @@ canvas { display: block; }
   min-height: 0;
 }
 
+#panel-hint {
+  font-size: 0.8rem;
+  color: #2c5282;
+  background: #ebf8ff;
+  border: 1px solid #bee3f8;
+  border-radius: 6px;
+  padding: 6px 10px;
+  margin-bottom: 8px;
+  flex-shrink: 0;
+}
+
 #editor {
   width: 100%;
   flex: 1;
