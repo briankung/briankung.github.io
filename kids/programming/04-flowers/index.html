@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Flowers &#8212; Code Playground</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    body { overflow: hidden; background: #87ceeb; }
+    canvas { display: block; }
+
+    #back {
+      position: fixed;
+      top: 12px;
+      left: 14px;
+      color: rgba(255,255,255,0.85);
+      text-decoration: none;
+      font: 13px monospace;
+      background: rgba(0,0,0,0.35);
+      padding: 4px 10px;
+      border-radius: 6px;
+      z-index: 10;
+    }
+    #back:hover { color: white; }
+
+    #panel {
+      position: fixed;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      background: rgba(255, 255, 255, 0.96);
+      border-top: 3px solid #68d391;
+      box-shadow: 0 -4px 24px rgba(0,0,0,0.18);
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', sans-serif;
+      transition: transform 0.3s ease;
+      z-index: 10;
+    }
+    #panel.collapsed { transform: translateY(calc(100% - 42px)); }
+
+    #panel-bar {
+      height: 42px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 0 14px;
+    }
+    #panel-bar-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: #2d3748;
+    }
+    #panel-toggle {
+      background: none;
+      border: 1px solid #e2e8f0;
+      border-radius: 6px;
+      cursor: pointer;
+      font: 12px monospace;
+      color: #718096;
+      padding: 3px 9px;
+    }
+    #panel-toggle:hover { background: #f7fafc; }
+
+    #panel-body { padding: 0 16px 16px; }
+
+    #instructions {
+      font-size: 0.875rem;
+      color: #4a5568;
+      line-height: 1.6;
+      margin-bottom: 12px;
+    }
+    kbd {
+      background: #edf2f7;
+      border: 1px solid #cbd5e0;
+      border-radius: 4px;
+      padding: 1px 5px;
+      font: 12px monospace;
+      color: #2d3748;
+    }
+    #print-btn {
+      background: #68d391;
+      color: #22543d;
+      border: none;
+      border-radius: 8px;
+      padding: 8px 18px;
+      font-size: 0.875rem;
+      font-weight: 600;
+      cursor: pointer;
+    }
+    #print-btn:hover { background: #48bb78; color: white; }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<a id="back" href="../">&larr; gallery</a>
+
+<div id="panel">
+  <div id="panel-bar">
+    <span id="panel-bar-title">Lesson 04 &mdash; Flowers</span>
+    <button id="panel-toggle" onclick="togglePanel()">hide &#9660;</button>
+  </div>
+  <div id="panel-body">
+    <div id="instructions"></div>
+    <button id="print-btn" onclick="printCode()">&#128438; Print the Code</button>
+  </div>
+</div>
+
+<script>
+// ── Canvas & resize ──────────────────────────────────────────────────────
+var canvas = document.getElementById('canvas');
+var ctx = canvas.getContext('2d');
+
+function resize() {
+  canvas.width = window.innerWidth;
+  canvas.height = window.innerHeight;
+  window.WIDTH = canvas.width;
+  window.HEIGHT = canvas.height;
+  if (!_loopId) drawPlaceholder();
+}
+window.addEventListener('resize', resize);
+
+function drawPlaceholder() {
+  // Sky
+  ctx.fillStyle = '#87ceeb';
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  // Ground
+  ctx.fillStyle = 'forestgreen';
+  ctx.fillRect(0, HEIGHT - 60, WIDTH, 60);
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(0,80,0,0.35)';
+  ctx.font = 'bold 28px -apple-system, sans-serif';
+  ctx.fillText('Lesson 04 \u2014 Flowers', WIDTH / 2, HEIGHT / 2 - 22);
+  ctx.font = '15px monospace';
+  ctx.fillStyle = 'rgba(0,80,0,0.28)';
+  ctx.fillText('open the console and type the code to start!', WIDTH / 2, HEIGHT / 2 + 18);
+  ctx.restore();
+}
+
+// ── Primitives (available in the browser console) ────────────────────────
+
+window.clear = function(color) {
+  ctx.fillStyle = color || '#000';
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+};
+
+window.circle = function(x, y, r, color) {
+  ctx.beginPath();
+  ctx.arc(x, y, Math.max(0, r), 0, Math.PI * 2);
+  ctx.fillStyle = color || 'white';
+  ctx.fill();
+};
+
+window.rect = function(x, y, w, h, color) {
+  ctx.fillStyle = color || 'white';
+  ctx.fillRect(x, y, w, h);
+};
+
+window.line = function(x1, y1, x2, y2, color, lineWidth) {
+  ctx.beginPath();
+  ctx.moveTo(x1, y1);
+  ctx.lineTo(x2, y2);
+  ctx.strokeStyle = color || 'white';
+  ctx.lineWidth = lineWidth || 1;
+  ctx.stroke();
+};
+
+window.text = function(str, x, y, color, size) {
+  ctx.fillStyle = color || 'white';
+  ctx.font = (size || 16) + 'px monospace';
+  ctx.fillText(str, x, y);
+};
+
+window.ring = function(x, y, r, color, lineWidth) {
+  ctx.beginPath();
+  ctx.arc(x, y, Math.max(0, r), 0, Math.PI * 2);
+  ctx.strokeStyle = color || 'white';
+  ctx.lineWidth = lineWidth || 1;
+  ctx.stroke();
+};
+
+var _loopId = null;
+
+window.loop = function(fn) {
+  if (_loopId) cancelAnimationFrame(_loopId);
+  function step() { fn(); _loopId = requestAnimationFrame(step); }
+  _loopId = requestAnimationFrame(step);
+};
+
+window.stop = function() {
+  if (_loopId) { cancelAnimationFrame(_loopId); _loopId = null; }
+};
+
+window.random = function(min, max) {
+  return min + Math.random() * (max - min);
+};
+
+window.ctx = ctx;
+
+resize();
+
+// ── Panel ────────────────────────────────────────────────────────────────
+var panelCollapsed = false;
+function togglePanel() {
+  panelCollapsed = !panelCollapsed;
+  document.getElementById('panel').classList.toggle('collapsed', panelCollapsed);
+  document.getElementById('panel-toggle').innerHTML =
+    panelCollapsed ? 'show &#9650;' : 'hide &#9660;';
+}
+
+(function() {
+  var ua = navigator.userAgent;
+  var browser = ua.indexOf('Firefox') !== -1 ? 'firefox'
+              : (ua.indexOf('Safari') !== -1 && ua.indexOf('Chrome') === -1) ? 'safari'
+              : 'chrome';
+  var mac = ua.indexOf('Mac') !== -1;
+  var el = document.getElementById('instructions');
+  if (browser === 'safari') {
+    el.innerHTML = '<strong>Safari:</strong> First go to <strong>Safari &rarr; Settings &rarr; Advanced</strong> and check <em>"Show features for web developers"</em>. Then press <kbd>Cmd &#8984;</kbd>&nbsp;<kbd>Option &#8997;</kbd>&nbsp;<kbd>C</kbd>.';
+  } else if (browser === 'firefox') {
+    el.innerHTML = mac
+      ? '<strong>Firefox:</strong> Press <kbd>Cmd &#8984;</kbd>&nbsp;<kbd>Option &#8997;</kbd>&nbsp;<kbd>K</kbd>, then click the <strong>Console</strong> tab.'
+      : '<strong>Firefox:</strong> Press <kbd>Ctrl</kbd>&nbsp;<kbd>Shift</kbd>&nbsp;<kbd>K</kbd>, then click the <strong>Console</strong> tab.';
+  } else {
+    el.innerHTML = mac
+      ? '<strong>Chrome:</strong> Press <kbd>Cmd &#8984;</kbd>&nbsp;<kbd>Option &#8997;</kbd>&nbsp;<kbd>J</kbd> to open the Console.'
+      : '<strong>Chrome:</strong> Press <kbd>Ctrl</kbd>&nbsp;<kbd>Shift</kbd>&nbsp;<kbd>J</kbd> to open the Console.';
+  }
+})();
+
+// ── Print view ───────────────────────────────────────────────────────────
+function escHtml(s) {
+  return s.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+}
+
+function colorCode(raw) {
+  return raw.split('\n').map(function(line) {
+    var t = line.trim();
+    if (t.startsWith('//')) return '<span class="cmt">' + escHtml(line) + '</span>';
+    return escHtml(line);
+  }).join('\n');
+}
+
+var CODE_STEP1 = [
+"// A list to hold all our flowers",
+"var flowers = [];",
+"// A timer to control when new flowers appear",
+"var timer = 0;"
+].join('\n');
+
+var CODE_STEP2 = [
+"loop(function() {",
+"  // Draw a sunny sky and a grassy ground",
+"  clear('lightblue');",
+"  rect(0, HEIGHT - 60, WIDTH, 60, 'forestgreen');",
+"",
+"  // Every 60 frames, plant a new flower in a random spot",
+"  timer++;",
+"  if (timer % 60 === 0) {",
+"    flowers.push({",
+"      x: random(40, WIDTH - 40),",
+"      size: 0,",
+"      maxSize: random(25, 55),",
+"      color: ['pink', 'red', 'magenta', 'orange', 'white'][Math.floor(random(0, 5))],",
+"      stem: random(50, 120)",
+"    });",
+"  }",
+"",
+"  // Draw each flower and make it grow bigger each frame",
+"  for (var f of flowers) {",
+"    if (f.size < f.maxSize) f.size += 1;",
+"",
+"    var rootY = HEIGHT - 60;",
+"    var topY = rootY - f.stem;",
+"",
+"    // Draw the stem",
+"    line(f.x, rootY, f.x, topY, 'green', 3);",
+"",
+"    // Once big enough, draw the petals and center",
+"    if (f.size > 5) {",
+"      for (var i = 0; i < 6; i++) {",
+"        var a = (i / 6) * Math.PI * 2;",
+"        circle(",
+"          f.x + Math.cos(a) * f.size * 0.7,",
+"          topY + Math.sin(a) * f.size * 0.7,",
+"          f.size * 0.45,",
+"          f.color",
+"        );",
+"      }",
+"      circle(f.x, topY, f.size * 0.3, 'yellow');",
+"    }",
+"  }",
+"});"
+].join('\n');
+
+function printCode() {
+  var w = window.open('', '_blank');
+  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8">'
+    + '<title>Flowers \u2014 Code Playground</title><style>'
+    + 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;max-width:680px;margin:0 auto;padding:2rem;color:#2d3748}'
+    + 'h1{font-size:2rem;color:#38a169;margin-bottom:.2rem}'
+    + '.sub{color:#718096;margin-bottom:1.5rem;font-size:.95rem}'
+    + 'h2{font-size:.95rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#a0aec0;margin:1.5rem 0 .5rem}'
+    + 'pre{background:#1a202c;color:#e2e8f0;padding:1.1rem 1.25rem;border-radius:10px;font:14px/1.75 monospace;white-space:pre-wrap;word-break:break-word}'
+    + '.cmt{color:#68d391}'
+    + '.try{background:#f0fff4;border-left:4px solid #68d391;padding:1rem 1.25rem;border-radius:0 10px 10px 0;margin-top:1.5rem}'
+    + '.try h2{color:#276749;font-size:1.1rem;text-transform:none;letter-spacing:0;margin-top:0}'
+    + '.try ol{padding-left:1.25rem;line-height:2.1;color:#22543d}'
+    + '.try code{background:#c6f6d5;padding:1px 5px;border-radius:4px;font:13px monospace}'
+    + '.print-btn{margin-top:1.5rem;background:#68d391;color:#22543d;border:none;border-radius:8px;padding:8px 20px;font-size:.9rem;font-weight:600;cursor:pointer}'
+    + '@media print{.print-btn{display:none}}'
+    + '</style></head><body>'
+    + '<h1>Flowers</h1>'
+    + '<p class="sub">Type this into your browser\'s console to grow a beautiful garden!</p>'
+    + '<h2>Step 1 &mdash; Get ready</h2>'
+    + '<pre>' + colorCode(CODE_STEP1) + '</pre>'
+    + '<h2>Step 2 &mdash; Grow the garden!</h2>'
+    + '<pre>' + colorCode(CODE_STEP2) + '</pre>'
+    + '<div class="try"><h2>&#128295; Try changing these things!</h2><ol>'
+    + '<li>Change <code>60</code> in <code>timer % 60</code> to <code>30</code> to plant flowers twice as fast</li>'
+    + '<li>Change <code>6</code> (petals) to <code>8</code> for fuller flowers</li>'
+    + '<li>Add <code>\'purple\'</code>, <code>\'coral\'</code>, or <code>\'hotpink\'</code> to the colors list</li>'
+    + '<li>Change <code>\'forestgreen\'</code> to <code>\'saddlebrown\'</code> for a desert garden</li>'
+    + '<li>Make taller flowers: change <code>random(50, 120)</code> to <code>random(100, 200)</code></li>'
+    + '</ol></div>'
+    + '<button class="print-btn" onclick="window.print()">&#128438; Print this page</button>'
+    + '</body></html>');
+  w.document.close();
+}
+</script>
+</body>
+</html>

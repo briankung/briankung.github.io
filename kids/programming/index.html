@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Code Playground</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Helvetica, sans-serif;
+      background: #f0f4ff;
+      min-height: 100vh;
+      padding: 2.5rem 1.5rem 3rem;
+    }
+    header {
+      text-align: center;
+      margin-bottom: 3rem;
+    }
+    header h1 {
+      font-size: 2.75rem;
+      color: #2d3748;
+      margin-bottom: 0.4rem;
+    }
+    header p {
+      font-size: 1.1rem;
+      color: #718096;
+      font-family: monospace;
+    }
+    .grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+      gap: 1.5rem;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+    .card {
+      background: white;
+      border-radius: 16px;
+      overflow: hidden;
+      box-shadow: 0 2px 10px rgba(0,0,0,0.08);
+      cursor: pointer;
+      text-decoration: none;
+      color: inherit;
+      display: block;
+      transition: transform 0.2s ease, box-shadow 0.2s ease;
+    }
+    .card:hover {
+      transform: translateY(-5px);
+      box-shadow: 0 10px 28px rgba(0,0,0,0.14);
+    }
+    .card canvas {
+      width: 100%;
+      height: 180px;
+      display: block;
+    }
+    .card-info {
+      padding: 0.9rem 1.1rem 1.1rem;
+    }
+    .card-number {
+      font-size: 0.7rem;
+      font-family: monospace;
+      color: #a0aec0;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+    }
+    .card-title {
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: #2d3748;
+      margin: 0.2rem 0 0.25rem;
+    }
+    .card-desc {
+      font-size: 0.875rem;
+      color: #718096;
+    }
+    footer {
+      text-align: center;
+      margin-top: 3rem;
+      font-size: 0.85rem;
+    }
+    footer a { color: #667eea; text-decoration: none; }
+    footer a:hover { text-decoration: underline; }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>&#127912; Code Playground</h1>
+  <p>Type the code. Make something happen!</p>
+</header>
+
+<div class="grid">
+
+  <a class="card" href="01-bubbles/">
+    <canvas id="c-bubbles" width="520" height="360"></canvas>
+    <div class="card-info">
+      <div class="card-number">Lesson 01</div>
+      <div class="card-title">Bubbles</div>
+      <div class="card-desc">Make colorful bubbles float up the screen</div>
+    </div>
+  </a>
+
+  <a class="card" href="02-stars/">
+    <canvas id="c-stars" width="520" height="360"></canvas>
+    <div class="card-info">
+      <div class="card-number">Lesson 02</div>
+      <div class="card-title">Stars</div>
+      <div class="card-desc">Zoom through a field of stars in outer space</div>
+    </div>
+  </a>
+
+  <a class="card" href="03-fireworks/">
+    <canvas id="c-fireworks" width="520" height="360"></canvas>
+    <div class="card-info">
+      <div class="card-number">Lesson 03</div>
+      <div class="card-title">Fireworks</div>
+      <div class="card-desc">Launch a dazzling fireworks display</div>
+    </div>
+  </a>
+
+  <a class="card" href="04-flowers/">
+    <canvas id="c-flowers" width="520" height="360"></canvas>
+    <div class="card-info">
+      <div class="card-number">Lesson 04</div>
+      <div class="card-title">Flowers</div>
+      <div class="card-desc">Grow a garden of colorful flowers</div>
+    </div>
+  </a>
+
+  <a class="card" href="05-rain/">
+    <canvas id="c-rain" width="520" height="360"></canvas>
+    <div class="card-info">
+      <div class="card-number">Lesson 05</div>
+      <div class="card-title">Rain</div>
+      <div class="card-desc">Make raindrops fall and ripples spread</div>
+    </div>
+  </a>
+
+</div>
+
+<footer>
+  <a href="../../">&larr; back to briankung.xyz</a>
+</footer>
+
+<script>
+// ── Bubbles thumbnail ──────────────────────────────────────────────────────
+(function() {
+  var canvas = document.getElementById('c-bubbles');
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var colors = ['pink', 'cyan', 'lime', 'yellow', 'orange'];
+  var bubbles = [];
+  for (var i = 0; i < 20; i++) {
+    bubbles.push({
+      x: Math.random() * W, y: Math.random() * H,
+      r: 10 + Math.random() * 30,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      speed: 0.5 + Math.random() * 1.5
+    });
+  }
+  function draw() {
+    ctx.fillStyle = 'navy';
+    ctx.fillRect(0, 0, W, H);
+    for (var b of bubbles) {
+      ctx.globalAlpha = 0.85;
+      ctx.beginPath(); ctx.arc(b.x, b.y, b.r, 0, Math.PI * 2);
+      ctx.fillStyle = b.color; ctx.fill();
+      ctx.globalAlpha = 1;
+      b.y -= b.speed;
+      if (b.y < -b.r) { b.y = H + b.r; b.x = Math.random() * W; }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── Stars thumbnail ────────────────────────────────────────────────────────
+(function() {
+  var canvas = document.getElementById('c-stars');
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var stars = [];
+  for (var i = 0; i < 120; i++) {
+    stars.push({ x: Math.random() * W, y: Math.random() * H,
+      size: 0.5 + Math.random() * 2.5, speed: 1 + Math.random() * 4 });
+  }
+  function draw() {
+    ctx.fillStyle = '#000'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'white';
+    for (var s of stars) {
+      ctx.beginPath(); ctx.arc(s.x, s.y, s.size, 0, Math.PI * 2); ctx.fill();
+      s.x -= s.speed;
+      if (s.x < 0) { s.x = W; s.y = Math.random() * H; }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── Fireworks thumbnail ────────────────────────────────────────────────────
+(function() {
+  var canvas = document.getElementById('c-fireworks');
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var colors = ['red', 'orange', 'yellow', 'pink', 'cyan', 'lime', 'white'];
+  var particles = [];
+  function boom(x, y) {
+    for (var i = 0; i < 60; i++) {
+      var angle = Math.random() * Math.PI * 2, speed = 1 + Math.random() * 5;
+      particles.push({ x: x, y: y, vx: Math.cos(angle) * speed, vy: Math.sin(angle) * speed,
+        color: colors[Math.floor(Math.random() * colors.length)], life: 1 });
+    }
+  }
+  boom(W / 2, H / 2);
+  function draw() {
+    ctx.fillStyle = 'rgba(0,0,0,0.18)'; ctx.fillRect(0, 0, W, H);
+    for (var p of particles) {
+      ctx.beginPath(); ctx.arc(p.x, p.y, Math.max(0, 3 * p.life), 0, Math.PI * 2);
+      ctx.fillStyle = p.color; ctx.globalAlpha = p.life; ctx.fill(); ctx.globalAlpha = 1;
+      p.x += p.vx; p.y += p.vy; p.vy += 0.08; p.life -= 0.015;
+    }
+    particles = particles.filter(function(p) { return p.life > 0; });
+    if (particles.length === 0) boom(80 + Math.random() * (W - 160), 40 + Math.random() * (H * 0.6));
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── Flowers thumbnail ──────────────────────────────────────────────────────
+(function() {
+  var canvas = document.getElementById('c-flowers');
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var colors = ['pink', 'red', 'magenta', 'orange', 'white', 'hotpink', 'coral'];
+  var flowers = [];
+  var timer = 0;
+
+  function addFlower() {
+    flowers.push({
+      x: 30 + Math.random() * (W - 60),
+      size: 0,
+      maxSize: 18 + Math.random() * 28,
+      color: colors[Math.floor(Math.random() * colors.length)],
+      stem: 35 + Math.random() * 60
+    });
+  }
+  for (var k = 0; k < 5; k++) addFlower();
+
+  function draw() {
+    ctx.fillStyle = '#87ceeb'; ctx.fillRect(0, 0, W, H);
+    ctx.fillStyle = 'forestgreen'; ctx.fillRect(0, H - 40, W, 40);
+    timer++;
+    if (timer % 60 === 0) addFlower();
+    for (var f of flowers) {
+      if (f.size < f.maxSize) f.size += 0.6;
+      var rootY = H - 40, topY = rootY - f.stem;
+      ctx.beginPath(); ctx.moveTo(f.x, rootY); ctx.lineTo(f.x, topY);
+      ctx.strokeStyle = 'green'; ctx.lineWidth = 2; ctx.stroke();
+      if (f.size > 4) {
+        for (var i = 0; i < 6; i++) {
+          var a = (i / 6) * Math.PI * 2;
+          ctx.beginPath();
+          ctx.arc(f.x + Math.cos(a) * f.size * 0.7, topY + Math.sin(a) * f.size * 0.7, f.size * 0.45, 0, Math.PI * 2);
+          ctx.fillStyle = f.color; ctx.fill();
+        }
+        ctx.beginPath(); ctx.arc(f.x, topY, f.size * 0.3, 0, Math.PI * 2);
+        ctx.fillStyle = 'yellow'; ctx.fill();
+      }
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── Rain thumbnail ─────────────────────────────────────────────────────────
+(function() {
+  var canvas = document.getElementById('c-rain');
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var drops = [], ripples = [];
+  function draw() {
+    ctx.fillStyle = '#1a1a2e'; ctx.fillRect(0, 0, W, H);
+    if (Math.random() < 0.3) drops.push({ x: Math.random() * W, y: 0, speed: 4 + Math.random() * 6 });
+    for (var i = drops.length - 1; i >= 0; i--) {
+      var d = drops[i];
+      ctx.beginPath(); ctx.moveTo(d.x, d.y); ctx.lineTo(d.x, d.y + 12);
+      ctx.strokeStyle = '#a0d8ef'; ctx.lineWidth = 1.5; ctx.stroke();
+      d.y += d.speed;
+      if (d.y > H) { ripples.push({ x: d.x, y: H - 8, r: 3, life: 1 }); drops.splice(i, 1); }
+    }
+    for (var r of ripples) {
+      ctx.beginPath(); ctx.arc(r.x, r.y, r.r, 0, Math.PI * 2);
+      ctx.strokeStyle = 'rgba(160,216,239,' + r.life.toFixed(2) + ')';
+      ctx.lineWidth = 1.5; ctx.stroke();
+      r.r += 2.5; r.life -= 0.025;
+    }
+    ripples = ripples.filter(function(r) { return r.life > 0; });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+</script>
+</body>
+</html>
