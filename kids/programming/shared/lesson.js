@@ -3,11 +3,24 @@ var canvas = document.getElementById('canvas');
 var ctx = canvas.getContext('2d');
 var _loopId = null;
 
+function updateHeight() {
+  var panelEl = document.getElementById('panel');
+  var panelH = 0;
+  if (panelEl) {
+    if (panelEl.classList.contains('collapsed')) {
+      panelH = 42;
+    } else {
+      panelH = panelEl.offsetHeight;
+    }
+  }
+  window.HEIGHT = window.innerHeight - panelH;
+}
+
 function resize() {
   canvas.width = window.innerWidth;
   canvas.height = window.innerHeight;
   window.WIDTH = canvas.width;
-  window.HEIGHT = canvas.height;
+  updateHeight();
   if (typeof drawPlaceholder === 'function' && !_loopId) drawPlaceholder();
 }
 window.addEventListener('resize', resize);
@@ -90,8 +103,9 @@ var panelCollapsed = false;
     if (!dragging) return;
     var h = Math.max(50, Math.min(window.innerHeight - 60, startH + (startY - y)));
     panelEl.style.height = h + 'px';
+    updateHeight();
   }
-  function onEnd() { dragging = false; }
+  function onEnd() { dragging = false; updateHeight(); }
 
   handleEl.addEventListener('mousedown', function(e) { onStart(e.clientY); e.preventDefault(); });
   document.addEventListener('mousemove', function(e) { onMove(e.clientY); });
@@ -106,6 +120,7 @@ function togglePanel() {
   document.getElementById('panel').classList.toggle('collapsed', panelCollapsed);
   document.getElementById('panel-toggle').innerHTML =
     panelCollapsed ? 'show &#9650;' : 'hide &#9660;';
+  updateHeight();
 }
 
 // ── Editor ───────────────────────────────────────────────────────────────
