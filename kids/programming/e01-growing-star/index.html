@@ -1,0 +1,93 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Growing Star &#8212; Code Playground</title>
+  <link rel="stylesheet" href="../shared/lesson.css">
+  <style>
+    :root {
+      --theme: #33ff33;
+      --theme-hover: #22cc22;
+      --theme-text: black;
+      --body-bg: #001a00;
+    }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<a id="back" href="../">&larr; gallery</a>
+
+<div id="panel">
+  <div id="panel-handle"></div>
+  <div id="panel-bar">
+    <span id="panel-bar-title">Easy 01 &mdash; Growing Star</span>
+    <button id="panel-toggle" onclick="togglePanel()">hide &#9660;</button>
+  </div>
+  <div id="panel-body">
+    <textarea id="editor" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>
+    <div id="btn-row">
+      <button id="run-btn" onclick="runCode()">&#9654; Run</button>
+      <button id="stop-btn" onclick="stop()">&#9632; Stop</button>
+      <button id="print-btn" onclick="printCode()">&#128424; Print</button>
+    </div>
+    <div id="error"></div>
+  </div>
+</div>
+
+<script src="../shared/lesson.js"></script>
+<script>
+function drawPlaceholder() {
+  ctx.fillStyle = '#001a00';
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(51,255,51,0.22)';
+  ctx.font = 'bold 28px -apple-system, sans-serif';
+  ctx.fillText('Easy 01 \u2014 Growing Star', WIDTH / 2, HEIGHT / 2 - 22);
+  ctx.font = '15px monospace';
+  ctx.fillStyle = 'rgba(51,255,51,0.18)';
+  ctx.fillText('type code in the editor below and click Run!', WIDTH / 2, HEIGHT / 2 + 18);
+  ctx.restore();
+}
+resize();
+
+var CODE_STEP1 = [
+"var size = 0",
+"var growing = true",
+"var t = 0",
+"",
+"loop(function() {",
+"  t++",
+"  if (t % 4 !== 0) return",
+"  clear('#001a00')",
+"",
+"  for (var i = 1; i <= size; i++) {",
+"    text('*'.repeat(i), 20, i * 30, '#33ff33', 24)",
+"  }",
+"",
+"  if (growing) size++; else size--",
+"  if (size > 15) growing = false",
+"  if (size < 1) growing = true",
+"})"
+].join('\n');
+
+var CODE_STEP2 = '';
+
+function printCode() {
+  buildPrintPage({
+    title: 'Growing Star',
+    code1: CODE_STEP1, code2: CODE_STEP2,
+    tries: [
+      'Change <code>\'*\'</code> to <code>\'#\'</code> or <code>\'@\'</code> for a different look',
+      'Change <code>15</code> to <code>25</code> to grow bigger',
+      'Change <code>4</code> to <code>2</code> to go faster, or <code>8</code> to go slower',
+      'Change <code>\'#33ff33\'</code> to <code>\'#ffb000\'</code> for amber text',
+      'Change <code>24</code> to <code>32</code> for bigger text'
+    ]
+  });
+}
+</script>
+</body>
+</html>

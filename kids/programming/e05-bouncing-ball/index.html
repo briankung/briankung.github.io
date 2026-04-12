@@ -1,0 +1,91 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Bouncing Ball &#8212; Code Playground</title>
+  <link rel="stylesheet" href="../shared/lesson.css">
+  <style>
+    :root {
+      --theme: #ff44ff;
+      --theme-hover: #cc22cc;
+      --theme-text: black;
+      --body-bg: #1a001a;
+    }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<a id="back" href="../">&larr; gallery</a>
+
+<div id="panel">
+  <div id="panel-handle"></div>
+  <div id="panel-bar">
+    <span id="panel-bar-title">Easy 05 &mdash; Bouncing Ball</span>
+    <button id="panel-toggle" onclick="togglePanel()">hide &#9660;</button>
+  </div>
+  <div id="panel-body">
+    <textarea id="editor" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>
+    <div id="btn-row">
+      <button id="run-btn" onclick="runCode()">&#9654; Run</button>
+      <button id="stop-btn" onclick="stop()">&#9632; Stop</button>
+      <button id="print-btn" onclick="printCode()">&#128424; Print</button>
+    </div>
+    <div id="error"></div>
+  </div>
+</div>
+
+<script src="../shared/lesson.js"></script>
+<script>
+function drawPlaceholder() {
+  ctx.fillStyle = '#1a001a';
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(255,68,255,0.22)';
+  ctx.font = 'bold 28px -apple-system, sans-serif';
+  ctx.fillText('Easy 05 \u2014 Bouncing Ball', WIDTH / 2, HEIGHT / 2 - 22);
+  ctx.font = '15px monospace';
+  ctx.fillStyle = 'rgba(255,68,255,0.18)';
+  ctx.fillText('type code in the editor below and click Run!', WIDTH / 2, HEIGHT / 2 + 18);
+  ctx.restore();
+}
+resize();
+
+var CODE_STEP1 = [
+"var x = 100",
+"var y = 100",
+"var dx = 4",
+"var dy = 3",
+"",
+"loop(function() {",
+"  clear('#1a001a')",
+"",
+"  text('\uD83C\uDFC0', x, y, 'white', 40)",
+"  x = x + dx",
+"  y = y + dy",
+"",
+"  if (x > WIDTH || x < 0) dx = -dx",
+"  if (y > HEIGHT || y < 0) dy = -dy",
+"})"
+].join('\n');
+
+var CODE_STEP2 = '';
+
+function printCode() {
+  buildPrintPage({
+    title: 'Bouncing Ball',
+    code1: CODE_STEP1, code2: CODE_STEP2,
+    tries: [
+      'Change <code>\'\uD83C\uDFC0\'</code> to <code>\'\u26BD\'</code> or <code>\'\uD83D\uDE80\'</code>',
+      'Change <code>4</code> and <code>3</code> to <code>10</code> and <code>8</code> for super speed',
+      'Change <code>40</code> to <code>80</code> for a giant ball',
+      'Change <code>\'#1a001a\'</code> to <code>\'#000033\'</code> for a dark blue background',
+      'Try adding a second ball with <code>x2</code>, <code>y2</code>, <code>dx2</code>, <code>dy2</code>'
+    ]
+  });
+}
+</script>
+</body>
+</html>

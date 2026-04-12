@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Wave &#8212; Code Playground</title>
+  <link rel="stylesheet" href="../shared/lesson.css">
+  <style>
+    :root {
+      --theme: #00ffcc;
+      --theme-hover: #00cc99;
+      --theme-text: black;
+      --body-bg: #001a1a;
+    }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<a id="back" href="../">&larr; gallery</a>
+
+<div id="panel">
+  <div id="panel-handle"></div>
+  <div id="panel-bar">
+    <span id="panel-bar-title">Easy 04 &mdash; Wave</span>
+    <button id="panel-toggle" onclick="togglePanel()">hide &#9660;</button>
+  </div>
+  <div id="panel-body">
+    <textarea id="editor" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>
+    <div id="btn-row">
+      <button id="run-btn" onclick="runCode()">&#9654; Run</button>
+      <button id="stop-btn" onclick="stop()">&#9632; Stop</button>
+      <button id="print-btn" onclick="printCode()">&#128424; Print</button>
+    </div>
+    <div id="error"></div>
+  </div>
+</div>
+
+<script src="../shared/lesson.js"></script>
+<script>
+function drawPlaceholder() {
+  ctx.fillStyle = '#001a1a';
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(0,255,204,0.22)';
+  ctx.font = 'bold 28px -apple-system, sans-serif';
+  ctx.fillText('Easy 04 \u2014 Wave', WIDTH / 2, HEIGHT / 2 - 22);
+  ctx.font = '15px monospace';
+  ctx.fillStyle = 'rgba(0,255,204,0.18)';
+  ctx.fillText('type code in the editor below and click Run!', WIDTH / 2, HEIGHT / 2 + 18);
+  ctx.restore();
+}
+resize();
+
+var CODE_STEP1 = [
+"var t = 0",
+"",
+"loop(function() {",
+"  clear('#001a1a')",
+"  t = t + 0.05",
+"",
+"  for (var row = 0; row < 15; row++) {",
+"    var x = Math.floor(10 + 8 * Math.sin(t + row))",
+"    text(' '.repeat(x) + '~ ~ ~ ~ ~', 20, 30 + row * 28, '#00ffcc', 22)",
+"  }",
+"})"
+].join('\n');
+
+var CODE_STEP2 = '';
+
+function printCode() {
+  buildPrintPage({
+    title: 'Wave',
+    code1: CODE_STEP1, code2: CODE_STEP2,
+    tries: [
+      'Change <code>\'~ ~ ~ ~ ~\'</code> to <code>\'=====\'</code> or <code>\'\u2248\u2248\u2248\u2248\u2248\'</code>',
+      'Change <code>15</code> to <code>25</code> for more rows',
+      'Change <code>0.05</code> to <code>0.15</code> to speed up the wave',
+      'Change <code>8</code> to <code>20</code> for a wider wave',
+      'Change <code>\'#00ffcc\'</code> to <code>\'#ff66ff\'</code> for pink waves'
+    ]
+  });
+}
+</script>
+</body>
+</html>

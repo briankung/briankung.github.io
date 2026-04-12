@@ -73,6 +73,22 @@
       font-size: 0.875rem;
       color: #718096;
     }
+    .section-header {
+      max-width: 1200px;
+      margin: 0 auto 1rem;
+    }
+    .section-header h2 {
+      font-size: 1.4rem;
+      color: #2d3748;
+    }
+    .section-header p {
+      font-size: 0.9rem;
+      color: #718096;
+      margin-top: 0.2rem;
+    }
+    .section-header + .grid {
+      margin-bottom: 2.5rem;
+    }
     footer {
       text-align: center;
       margin-top: 3rem;
@@ -89,6 +105,63 @@
   <p>Type the code. Make something happen!</p>
 </header>
 
+<div class="section-header">
+  <h2>Text Art</h2>
+  <p>Less code, retro vibes</p>
+</div>
+<div class="grid">
+
+  <a class="card" href="e01-growing-star/">
+    <canvas id="c-growing-star" width="520" height="360"></canvas>
+    <div class="card-info">
+      <div class="card-number">Easy 01</div>
+      <div class="card-title">Growing Star</div>
+      <div class="card-desc">Watch a star pattern grow and shrink</div>
+    </div>
+  </a>
+
+  <a class="card" href="e02-marquee/">
+    <canvas id="c-marquee" width="520" height="360"></canvas>
+    <div class="card-info">
+      <div class="card-number">Easy 02</div>
+      <div class="card-title">Marquee</div>
+      <div class="card-desc">Scroll a message across the screen</div>
+    </div>
+  </a>
+
+  <a class="card" href="e03-emoji-rain/">
+    <canvas id="c-emoji-rain" width="520" height="360"></canvas>
+    <div class="card-info">
+      <div class="card-number">Easy 03</div>
+      <div class="card-title">Emoji Rain</div>
+      <div class="card-desc">Make emoji fall from the sky</div>
+    </div>
+  </a>
+
+  <a class="card" href="e04-wave/">
+    <canvas id="c-wave" width="520" height="360"></canvas>
+    <div class="card-info">
+      <div class="card-number">Easy 04</div>
+      <div class="card-title">Wave</div>
+      <div class="card-desc">Create a flowing wave of text</div>
+    </div>
+  </a>
+
+  <a class="card" href="e05-bouncing-ball/">
+    <canvas id="c-bouncing-ball" width="520" height="360"></canvas>
+    <div class="card-info">
+      <div class="card-number">Easy 05</div>
+      <div class="card-title">Bouncing Ball</div>
+      <div class="card-desc">Bounce an emoji around the screen</div>
+    </div>
+  </a>
+
+</div>
+
+<div class="section-header">
+  <h2>Canvas Art</h2>
+  <p>More code, more power</p>
+</div>
 <div class="grid">
 
   <a class="card" href="01-bubbles/">
@@ -143,6 +216,113 @@
 </footer>
 
 <script>
+// ── Growing Star thumbnail ────────────────────────────────────────────────
+(function() {
+  var canvas = document.getElementById('c-growing-star');
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var size = 0, growing = true, t = 0;
+  function draw() {
+    t++;
+    if (t % 4 === 0) {
+      ctx.fillStyle = '#001a00'; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#33ff33'; ctx.font = '18px monospace';
+      for (var i = 1; i <= size; i++) {
+        ctx.fillText('*'.repeat(i), 16, i * 22);
+      }
+      if (growing) size++; else size--;
+      if (size > 14) growing = false;
+      if (size < 1) growing = true;
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── Marquee thumbnail ─────────────────────────────────────────────────────
+(function() {
+  var canvas = document.getElementById('c-marquee');
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var x = W, t = 0;
+  function draw() {
+    t++;
+    if (t % 2 === 0) {
+      ctx.fillStyle = '#1a1000'; ctx.fillRect(0, 0, W, H);
+      ctx.fillStyle = '#ffb000'; ctx.font = '36px monospace';
+      ctx.fillText('HELLO WORLD!', x, H / 2);
+      x -= 4;
+      if (x < -400) x = W;
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── Emoji Rain thumbnail ──────────────────────────────────────────────────
+(function() {
+  var canvas = document.getElementById('c-emoji-rain');
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var drops = [];
+  var faces = ['\u2B50', '\u2764\uFE0F', '\uD83C\uDF19', '\uD83C\uDF1F'];
+  var t = 0;
+  function draw() {
+    ctx.fillStyle = '#0a0a2a'; ctx.fillRect(0, 0, W, H);
+    t++;
+    if (t % 10 === 0) {
+      drops.push({ x: Math.random() * (W - 40) + 20, y: 0,
+        speed: 1.5 + Math.random() * 3,
+        face: faces[Math.floor(Math.random() * faces.length)] });
+    }
+    ctx.font = '22px serif';
+    for (var d of drops) {
+      ctx.fillText(d.face, d.x, d.y);
+      d.y += d.speed;
+    }
+    drops = drops.filter(function(d) { return d.y < H; });
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── Wave thumbnail ────────────────────────────────────────────────────────
+(function() {
+  var canvas = document.getElementById('c-wave');
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var t = 0;
+  function draw() {
+    ctx.fillStyle = '#001a1a'; ctx.fillRect(0, 0, W, H);
+    t += 0.05;
+    ctx.fillStyle = '#00ffcc'; ctx.font = '16px monospace';
+    for (var row = 0; row < 15; row++) {
+      var x = Math.floor(10 + 8 * Math.sin(t + row));
+      ctx.fillText(' '.repeat(x) + '~ ~ ~ ~ ~', 16, 22 + row * 22);
+    }
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
+// ── Bouncing Ball thumbnail ───────────────────────────────────────────────
+(function() {
+  var canvas = document.getElementById('c-bouncing-ball');
+  var ctx = canvas.getContext('2d');
+  var W = canvas.width, H = canvas.height;
+  var x = 100, y = 100, dx = 3, dy = 2;
+  function draw() {
+    ctx.fillStyle = '#1a001a'; ctx.fillRect(0, 0, W, H);
+    ctx.font = '32px serif';
+    ctx.fillText('\uD83C\uDFC0', x, y);
+    x += dx; y += dy;
+    if (x > W - 32 || x < 0) dx = -dx;
+    if (y > H || y < 32) dy = -dy;
+    requestAnimationFrame(draw);
+  }
+  draw();
+})();
+
 // ── Bubbles thumbnail ──────────────────────────────────────────────────────
 (function() {
   var canvas = document.getElementById('c-bubbles');

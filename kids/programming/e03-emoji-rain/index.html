@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Emoji Rain &#8212; Code Playground</title>
+  <link rel="stylesheet" href="../shared/lesson.css">
+  <style>
+    :root {
+      --theme: #00ffff;
+      --theme-hover: #00cccc;
+      --theme-text: black;
+      --body-bg: #0a0a2a;
+    }
+  </style>
+</head>
+<body>
+<canvas id="canvas"></canvas>
+<a id="back" href="../">&larr; gallery</a>
+
+<div id="panel">
+  <div id="panel-handle"></div>
+  <div id="panel-bar">
+    <span id="panel-bar-title">Easy 03 &mdash; Emoji Rain</span>
+    <button id="panel-toggle" onclick="togglePanel()">hide &#9660;</button>
+  </div>
+  <div id="panel-body">
+    <textarea id="editor" spellcheck="false" autocorrect="off" autocapitalize="off"></textarea>
+    <div id="btn-row">
+      <button id="run-btn" onclick="runCode()">&#9654; Run</button>
+      <button id="stop-btn" onclick="stop()">&#9632; Stop</button>
+      <button id="print-btn" onclick="printCode()">&#128424; Print</button>
+    </div>
+    <div id="error"></div>
+  </div>
+</div>
+
+<script src="../shared/lesson.js"></script>
+<script>
+function drawPlaceholder() {
+  ctx.fillStyle = '#0a0a2a';
+  ctx.fillRect(0, 0, WIDTH, HEIGHT);
+  ctx.save();
+  ctx.textAlign = 'center';
+  ctx.textBaseline = 'middle';
+  ctx.fillStyle = 'rgba(0,255,255,0.22)';
+  ctx.font = 'bold 28px -apple-system, sans-serif';
+  ctx.fillText('Easy 03 \u2014 Emoji Rain', WIDTH / 2, HEIGHT / 2 - 22);
+  ctx.font = '15px monospace';
+  ctx.fillStyle = 'rgba(0,255,255,0.18)';
+  ctx.fillText('type code in the editor below and click Run!', WIDTH / 2, HEIGHT / 2 + 18);
+  ctx.restore();
+}
+resize();
+
+var CODE_STEP1 = [
+"var drops = []",
+"var faces = ['\u2B50', '\u2764\uFE0F', '\uD83C\uDF19', '\uD83C\uDF1F']",
+"var t = 0",
+"",
+"loop(function() {",
+"  clear('#0a0a2a')",
+"  t++",
+"",
+"  // Add a new drop every 10 frames",
+"  if (t % 10 === 0) {",
+"    drops.push({ x: random(20, WIDTH - 20), y: 0, speed: random(2, 6),",
+"      face: faces[Math.floor(random(0, 4))] })",
+"  }",
+"",
+"  // Draw and move each drop",
+"  for (var d of drops) {",
+"    text(d.face, d.x, d.y, 'white', 28)",
+"    d.y = d.y + d.speed",
+"  }",
+"",
+"  // Remove drops that fell off screen",
+"  drops = drops.filter(function(d) { return d.y < HEIGHT })",
+"})"
+].join('\n');
+
+var CODE_STEP2 = '';
+
+function printCode() {
+  buildPrintPage({
+    title: 'Emoji Rain',
+    code1: CODE_STEP1, code2: CODE_STEP2,
+    tries: [
+      'Change the emojis to your favorites',
+      'Change <code>10</code> to <code>3</code> for a downpour',
+      'Change <code>random(2, 6)</code> to <code>random(8, 15)</code> for fast drops',
+      'Change <code>28</code> to <code>48</code> for giant emoji',
+      'Change <code>\'#0a0a2a\'</code> to <code>\'#1a0a0a\'</code> for a red-tinted sky'
+    ]
+  });
+}
+</script>
+</body>
+</html>
