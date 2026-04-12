@@ -72,27 +72,9 @@ window.ctx = ctx;
 // NOTE: resize() is not called here — each lesson calls it after defining drawPlaceholder()
 
 // ── Panel ────────────────────────────────────────────────────────────────
-// Relabel the print button and add an onboarding hint so it's clear
-// that printing the code sheet is the first step.
 (function() {
   var btn = document.getElementById('print-btn');
   if (btn) btn.innerHTML = '🖨️ Print Code Sheet';
-
-  var hint = document.createElement('p');
-  hint.id = 'panel-hint';
-  hint.innerHTML = '<strong>First time?</strong> Click <strong>Print Code Sheet</strong> to get the code, then type it in here and click <strong>Run</strong>!';
-  var body = document.getElementById('panel-body');
-  if (body) body.insertBefore(hint, body.firstChild);
-
-  var editor = document.getElementById('editor');
-  if (editor) {
-    editor.addEventListener('input', function() {
-      if (editor.value.trim()) {
-        var h = document.getElementById('panel-hint');
-        if (h) h.style.display = 'none';
-      }
-    });
-  }
 })();
 
 var panelCollapsed = false;
@@ -165,26 +147,18 @@ function colorCode(raw) {
 
 function buildPrintPage(cfg) {
   var combinedCode = cfg.code1 + '\n\n' + cfg.code2;
-  var w = window.open('', '_blank');
-  w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8">'
+  var html = '<!DOCTYPE html><html><head><meta charset="utf-8">'
     + '<title>' + cfg.title + ' \u2014 Code Playground</title><style>'
     + 'body{font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;max-width:680px;margin:0 auto;padding:2rem;color:#2d3748}'
     + 'h1{font-size:2rem;color:' + cfg.h1Color + ';margin-bottom:.2rem}'
     + '.sub{color:#718096;margin-bottom:1.5rem;font-size:.95rem}'
     + 'h2{font-size:.95rem;font-weight:800;text-transform:uppercase;letter-spacing:.1em;color:#a0aec0;margin:1.5rem 0 .5rem}'
-    + 'pre{background:#1a202c;color:#e2e8f0;padding:1.1rem 1.25rem;border-radius:10px;font:14px/1.75 monospace;white-space:pre-wrap;word-break:break-word}'
-    + '.cmt{color:#68d391}'
-    + '.try{background:' + cfg.tryBg + ';border-left:4px solid ' + cfg.tryBorder + ';padding:1rem 1.25rem;border-radius:0 10px 10px 0;margin-top:1.5rem}'
+    + 'pre{background:#f7fafc;color:#1a202c;border:2px solid #cbd5e0;padding:1.1rem 1.25rem;border-radius:10px;font:14px/1.75 monospace;white-space:pre-wrap;word-break:break-word}'
+    + '.cmt{color:#2f855a}'
+    + '.try{background:#f7fafc;border-left:4px solid ' + cfg.tryBorder + ';padding:1rem 1.25rem;border-radius:0 10px 10px 0;margin-top:1.5rem}'
     + '.try h2{color:' + cfg.tryH2Color + ';font-size:1.1rem;text-transform:none;letter-spacing:0;margin-top:0}'
     + '.try ol{padding-left:1.25rem;line-height:2.1;color:' + cfg.tryOlColor + '}'
-    + '.try code{background:' + cfg.tryCodeBg + ';padding:1px 5px;border-radius:4px;font:13px monospace}'
-    + '.print-btn{margin-top:1.5rem;background:' + cfg.btnBg + ';color:' + cfg.btnColor + ';border:none;border-radius:8px;padding:8px 20px;font-size:.9rem;font-weight:600;cursor:pointer}'
-    + '@media print{.print-btn{display:none}'
-    + 'pre{background:#f7fafc !important;color:#1a202c !important;border:2px solid #cbd5e0;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
-    + '.cmt{color:#2f855a !important}'
-    + '.try{border-left-color:#a0aec0 !important;background:#f7fafc !important}'
-    + '.try code{background:#e2e8f0 !important}'
-    + '}'
+    + '.try code{background:#e2e8f0;padding:1px 5px;border-radius:4px;font:13px monospace}'
     + '</style></head><body>'
     + '<h1>' + cfg.title + '</h1>'
     + '<p class="sub">' + cfg.subtitle + '</p>'
@@ -193,7 +167,15 @@ function buildPrintPage(cfg) {
     + '<div class="try"><h2>&#128295; Try changing these things!</h2><ol>'
     + cfg.tries.map(function(t) { return '<li>' + t + '</li>'; }).join('')
     + '</ol></div>'
-    + '<button class="print-btn" onclick="window.print()">🖨️ Print this page</button>'
-    + '</body></html>');
-  w.document.close();
+    + '</body></html>';
+
+  var iframe = document.createElement('iframe');
+  iframe.style.cssText = 'position:fixed;left:-9999px;width:680px;height:0';
+  document.body.appendChild(iframe);
+  iframe.contentDocument.open();
+  iframe.contentDocument.write(html);
+  iframe.contentDocument.close();
+  iframe.contentWindow.focus();
+  iframe.contentWindow.print();
+  setTimeout(function() { document.body.removeChild(iframe); }, 1000);
 }

@@ -83,17 +83,6 @@ canvas { display: block; }
   min-height: 0;
 }
 
-#panel-hint {
-  font-size: 0.8rem;
-  color: #2c5282;
-  background: #ebf8ff;
-  border: 1px solid #bee3f8;
-  border-radius: 6px;
-  padding: 6px 10px;
-  margin-bottom: 8px;
-  flex-shrink: 0;
-}
-
 #editor {
   width: 100%;
   flex: 1;
@@ -134,6 +123,7 @@ canvas { display: block; }
 #stop-btn:hover { background: #cbd5e0; }
 #error { margin-top: 6px; font: 12px/1.4 monospace; color: #e53e3e; min-height: 16px; }
 #print-btn {
+  margin-left: auto;
   background: var(--theme);
   color: var(--theme-text);
   border: none;
