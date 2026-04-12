@@ -164,6 +164,7 @@ function colorCode(raw) {
 }
 
 function buildPrintPage(cfg) {
+  var combinedCode = cfg.code1 + '\n\n' + cfg.code2;
   var w = window.open('', '_blank');
   w.document.write('<!DOCTYPE html><html><head><meta charset="utf-8">'
     + '<title>' + cfg.title + ' \u2014 Code Playground</title><style>'
@@ -178,14 +179,17 @@ function buildPrintPage(cfg) {
     + '.try ol{padding-left:1.25rem;line-height:2.1;color:' + cfg.tryOlColor + '}'
     + '.try code{background:' + cfg.tryCodeBg + ';padding:1px 5px;border-radius:4px;font:13px monospace}'
     + '.print-btn{margin-top:1.5rem;background:' + cfg.btnBg + ';color:' + cfg.btnColor + ';border:none;border-radius:8px;padding:8px 20px;font-size:.9rem;font-weight:600;cursor:pointer}'
-    + '@media print{.print-btn{display:none}}'
+    + '@media print{.print-btn{display:none}'
+    + 'pre{background:#f7fafc !important;color:#1a202c !important;border:2px solid #cbd5e0;-webkit-print-color-adjust:exact;print-color-adjust:exact}'
+    + '.cmt{color:#2f855a !important}'
+    + '.try{border-left-color:#a0aec0 !important;background:#f7fafc !important}'
+    + '.try code{background:#e2e8f0 !important}'
+    + '}'
     + '</style></head><body>'
     + '<h1>' + cfg.title + '</h1>'
     + '<p class="sub">' + cfg.subtitle + '</p>'
-    + '<h2>Step 1 &mdash; ' + cfg.step1Label + '</h2>'
-    + '<pre>' + colorCode(cfg.code1) + '</pre>'
-    + '<h2>Step 2 &mdash; ' + cfg.step2Label + '</h2>'
-    + '<pre>' + colorCode(cfg.code2) + '</pre>'
+    + '<h2>Code</h2>'
+    + '<pre>' + colorCode(combinedCode) + '</pre>'
     + '<div class="try"><h2>&#128295; Try changing these things!</h2><ol>'
     + cfg.tries.map(function(t) { return '<li>' + t + '</li>'; }).join('')
     + '</ol></div>'
