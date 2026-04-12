@@ -172,7 +172,9 @@ function buildPrintPage(cfg) {
     + '.try h2{color:#4a5568;font-size:1.1rem;text-transform:none;letter-spacing:0;margin-top:0}'
     + '.try ol{padding-left:1.25rem;line-height:2.1;color:#2d3748}'
     + '.try code{background:#e2e8f0;padding:1px 5px;border-radius:4px;font:13px monospace}'
+    + 'h1{font-size:2rem;color:#2d3748;margin-bottom:1.5rem}'
     + '</style></head><body>'
+    + '<h1>' + cfg.title + '</h1>'
     + '<pre>' + colorCode(combinedCode) + '</pre>'
     + '<div class="try"><h2>&#128295; Try changing these things!</h2><ol>'
     + cfg.tries.map(function(t) { return '<li>' + t + '</li>'; }).join('')
