@@ -7,25 +7,19 @@
   <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
 
   <style>
-    body, html {
+    html, body {
+      margin: 0;
+      padding: 0;
       background-color: black;
-      height: 100%;
-      display: grid;
-    }
-
-    #svg {
       width: 100%;
-      margin: auto;
+      height: 100%;
+      overflow: hidden;
     }
 
-    text {
-      font-family: 'SimSun', sans-serif;
-      fill: #f8f8ff;
-    }
-
-    text tspan {
-      font-size: x-small;
-      fill: darkgray;
+    #clock-canvas {
+      display: block;
+      width: 100%;
+      height: 100%;
     }
 
     #fullscreen-btn {
@@ -61,9 +55,7 @@
   </style>
 </head>
 <body onclick="toggleFullscreen()" ontouchstart="toggleFullscreen()">
-  <svg id="svg">
-    <text id="clock" x="0" y="15"></text>
-  </svg>
+  <canvas id="clock-canvas"></canvas>
   <button id="fullscreen-btn" aria-label="Enter fullscreen" onclick="toggleFullscreen(event)" ontouchstart="toggleFullscreen(event)">
     <svg id="fullscreen-icon" viewBox="0 0 24 24">
       <path id="fullscreen-icon-path" d="M4 9 V4 H9 M20 9 V4 H15 M4 15 V20 H9 M20 15 V20 H15"/>
@@ -77,12 +69,7 @@
 <script>
   const MILLISECONDS = 1000,
         ONE_MINUTE_IN_MILLISECONDS = MILLISECONDS * 60,
-        NO_SLEEP = new NoSleep(),
-        CLOCK = document.getElementById('clock'),
-        MS_TO_NEXT_MINUTE = (ONE_MINUTE_IN_MILLISECONDS - ((new Date).getSeconds() * MILLISECONDS)),
-        SVG = document.getElementById('svg'),
-        SMALLER_SVG = "0 0 41 18",
-        BIGGER_SVG = "0 0 31 18";
+        NO_SLEEP = new NoSleep();
 
   function toggleFullscreen(event) {
     if (event) event.stopPropagation();
@@ -123,34 +110,194 @@
   document.addEventListener('fullscreenchange', updateFullscreenIcon);
   document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
 
+  // ---------- Caustic-lit clock shader ----------
+  const canvas = document.getElementById('clock-canvas'),
+        gl = canvas.getContext('webgl', { antialias: true, premultipliedAlpha: false });
+
+  const VERT_SRC = `
+    attribute vec2 aPos;
+    void main() { gl_Position = vec4(aPos, 0.0, 1.0); }
+  `;
+
+  const FRAG_SRC = `
+    precision highp float;
+
+    uniform vec2  uResolution;
+    uniform float uTime;
+    uniform float uWaterLevel;
+    uniform sampler2D uMask;
+
+    const float TAU = 6.28318530718;
+    const vec3  LIGHT_COLOR = vec3(0.65, 0.88, 1.0);
+    const float BRIGHTNESS  = 1.2;
+    const float FALLOFF     = 0.6;
+    const float CELL_DENSITY = 1.4; // larger = smaller cells
+
+    // 2D dappled caustic — adapted from TDM's "Caustic" (Shadertoy MdlXz8)
+    float caustic(vec2 p, float time) {
+      vec2 i = p;
+      float c = 1.0;
+      float inten = 0.005;
+      for (int n = 0; n < 5; n++) {
+        float t = time * (1.0 - (3.5 / float(n + 1)));
+        i = p + vec2(cos(t - i.x) + sin(t + i.y),
+                     sin(t - i.y) + cos(t + i.x));
+        c += 1.0 / length(vec2(p.x / (sin(i.x + t) / inten),
+                               p.y / (cos(i.y + t) / inten)));
+      }
+      c /= 5.0;
+      c = 1.17 - pow(c, 1.4);
+      return pow(abs(c), 8.0);
+    }
+
+    void main() {
+      vec2 uv = gl_FragCoord.xy / uResolution.xy;
+      float mask = texture2D(uMask, uv).r;
+
+      // Caustic over the entire wall, not just the digits
+      vec2 p = gl_FragCoord.xy / uResolution.y * TAU * CELL_DENSITY - 250.0;
+      float light = caustic(p, uTime * 0.5 + 23.0);
+
+      // Cluster the visible caustic around screen center — same cell size,
+      // smaller bright patch so only a few cells light up at a time.
+      vec2 centered = (gl_FragCoord.xy - uResolution.xy * 0.5) / uResolution.y;
+      float r = length(centered);
+      float spotlight = 1.0 - smoothstep(0.18, 0.45, r);
+      light *= spotlight;
+
+      float heightAboveWater = uv.y - uWaterLevel;
+      float falloff = exp(-max(heightAboveWater, 0.0) * FALLOFF);
+      light *= falloff;
+      light += exp(-max(heightAboveWater, 0.0) * 14.0) * 0.35 * spotlight;
+
+      vec3 wallColor = vec3(0.05, 0.06, 0.08);
+      vec3 color = wallColor + LIGHT_COLOR * light * BRIGHTNESS;
+
+      if (heightAboveWater < 0.0) {
+        color = mix(color, vec3(0.02, 0.05, 0.08), 0.5);
+      }
+
+      // Overlay the digits on top — keep them readable as a brighter highlight
+      // that the caustic still plays across.
+      color += vec3(0.18, 0.22, 0.28) * mask;
+
+      gl_FragColor = vec4(color, 1.0);
+    }
+  `;
+
+  function compile(type, src) {
+    const sh = gl.createShader(type);
+    gl.shaderSource(sh, src);
+    gl.compileShader(sh);
+    if (!gl.getShaderParameter(sh, gl.COMPILE_STATUS)) {
+      console.error(gl.getShaderInfoLog(sh));
+    }
+    return sh;
+  }
+
+  const prog = gl.createProgram();
+  gl.attachShader(prog, compile(gl.VERTEX_SHADER, VERT_SRC));
+  gl.attachShader(prog, compile(gl.FRAGMENT_SHADER, FRAG_SRC));
+  gl.linkProgram(prog);
+  gl.useProgram(prog);
+
+  const quadBuf = gl.createBuffer();
+  gl.bindBuffer(gl.ARRAY_BUFFER, quadBuf);
+  gl.bufferData(gl.ARRAY_BUFFER, new Float32Array([-1,-1, 1,-1, -1,1, 1,1]), gl.STATIC_DRAW);
+  const aPos = gl.getAttribLocation(prog, 'aPos');
+  gl.enableVertexAttribArray(aPos);
+  gl.vertexAttribPointer(aPos, 2, gl.FLOAT, false, 0, 0);
+
+  const uResolution = gl.getUniformLocation(prog, 'uResolution'),
+        uTime       = gl.getUniformLocation(prog, 'uTime'),
+        uWaterLevel = gl.getUniformLocation(prog, 'uWaterLevel'),
+        uMask       = gl.getUniformLocation(prog, 'uMask');
+
+  const maskTex = gl.createTexture();
+  gl.bindTexture(gl.TEXTURE_2D, maskTex);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MIN_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_MAG_FILTER, gl.LINEAR);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_S, gl.CLAMP_TO_EDGE);
+  gl.texParameteri(gl.TEXTURE_2D, gl.TEXTURE_WRAP_T, gl.CLAMP_TO_EDGE);
+  gl.pixelStorei(gl.UNPACK_FLIP_Y_WEBGL, true);
+
+  const maskCanvas = document.createElement('canvas'),
+        maskCtx = maskCanvas.getContext('2d');
+
+  let currentTime = '',
+      waterLevel = 0.15;
+
+  function uploadMask() {
+    if (!currentTime || !maskCanvas.width) return;
+    const w = maskCanvas.width, h = maskCanvas.height;
+
+    maskCtx.fillStyle = 'black';
+    maskCtx.fillRect(0, 0, w, h);
+
+    let fontSize = Math.floor(h * 0.85);
+    const fontFamily = 'SimSun, "Songti SC", "Songti TC", serif';
+    maskCtx.font = `${fontSize}px ${fontFamily}`;
+    const measured = maskCtx.measureText(currentTime);
+    if (measured.width > w * 0.92) {
+      fontSize = Math.floor(fontSize * (w * 0.92) / measured.width);
+      maskCtx.font = `${fontSize}px ${fontFamily}`;
+    }
+
+    maskCtx.fillStyle = 'white';
+    maskCtx.textAlign = 'center';
+    maskCtx.textBaseline = 'middle';
+    maskCtx.fillText(currentTime, w / 2, h / 2);
+
+    // Water level: just below the digit baseline, in WebGL uv (y=0 at bottom)
+    const textBottomPx = h / 2 + fontSize * 0.4;
+    waterLevel = Math.max(0.0, 1.0 - textBottomPx / h - 0.01);
+
+    gl.bindTexture(gl.TEXTURE_2D, maskTex);
+    gl.texImage2D(gl.TEXTURE_2D, 0, gl.RGBA, gl.RGBA, gl.UNSIGNED_BYTE, maskCanvas);
+  }
+
+  function resize() {
+    const dpr = Math.min(window.devicePixelRatio || 1, 2);
+    const w = Math.floor(window.innerWidth * dpr);
+    const h = Math.floor(window.innerHeight * dpr);
+    canvas.width = w;
+    canvas.height = h;
+    maskCanvas.width = w;
+    maskCanvas.height = h;
+    gl.viewport(0, 0, w, h);
+    uploadMask();
+  }
+
   function updateDisplayTime() {
-    const [_wholeMatch, time, _ampm] = (new Date)
-            .toLocaleString('en-US', {
-              hour: 'numeric',
-              minute: 'numeric',
-              hour12: true
-            })
-            .match(/^(\d{1,2}:\d{2})(.+)$/);
+    const match = (new Date)
+      .toLocaleString('en-US', { hour: 'numeric', minute: 'numeric', hour12: true })
+      .match(/^(\d{1,2}:\d{2})(.+)$/);
+    currentTime = match ? match[1] : '';
+    uploadMask();
+  }
 
-    CLOCK.textContent = time;
-    const [hours, minutes] = time.split(':')
+  function frame(t) {
+    gl.uniform2f(uResolution, canvas.width, canvas.height);
+    gl.uniform1f(uTime, t / 1000);
+    gl.uniform1f(uWaterLevel, waterLevel);
+    gl.uniform1i(uMask, 0);
+    gl.activeTexture(gl.TEXTURE0);
+    gl.bindTexture(gl.TEXTURE_2D, maskTex);
+    gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
+    requestAnimationFrame(frame);
+  }
 
-    if (hours.length > 1) {
-      SVG.setAttribute('viewBox', SMALLER_SVG);
-    } else {
-      SVG.setAttribute('viewBox', BIGGER_SVG);
-    };
-  };
-
-  window.setTimeout(
-    () => {
-      updateDisplayTime();
-      window.setInterval(updateDisplayTime, ONE_MINUTE_IN_MILLISECONDS)
-    },
-    MS_TO_NEXT_MINUTE
-  );
-
+  window.addEventListener('resize', resize);
+  resize();
   updateDisplayTime();
+
+  const MS_TO_NEXT_MINUTE = ONE_MINUTE_IN_MILLISECONDS - ((new Date).getSeconds() * MILLISECONDS);
+  setTimeout(() => {
+    updateDisplayTime();
+    setInterval(updateDisplayTime, ONE_MINUTE_IN_MILLISECONDS);
+  }, MS_TO_NEXT_MINUTE);
+
+  requestAnimationFrame(frame);
 </script>
 
  <script src="../src/pulldown.js"></script>
