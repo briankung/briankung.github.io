@@ -160,7 +160,8 @@
 
       // Cluster the visible caustic around screen center — same cell size,
       // smaller bright patch so only a few cells light up at a time.
-      vec2 centered = (gl_FragCoord.xy - uResolution.xy * 0.5) / uResolution.y;
+      vec2 spotCenter = vec2(uResolution.x * 0.4, uResolution.y * 0.6);
+      vec2 centered = (gl_FragCoord.xy - spotCenter) / uResolution.y;
       float r = length(centered);
       float spotlight = 1.0 - smoothstep(0.18, 0.45, r);
       light *= spotlight;
@@ -170,16 +171,15 @@
       light *= falloff;
       light += exp(-max(heightAboveWater, 0.0) * 14.0) * 0.35 * spotlight;
 
-      vec3 wallColor = vec3(0.05, 0.06, 0.08);
-      vec3 color = wallColor + LIGHT_COLOR * light * BRIGHTNESS;
+      // White glyphs modulated by the caustic, with a brightness floor so they
+      // stay legible even where the caustic is dark.
+      float bodyLight = clamp(light * BRIGHTNESS + 0.55, 0.55, 1.0);
+      vec3 textColor = mix(vec3(1.0), LIGHT_COLOR, 0.35) * bodyLight;
 
-      if (heightAboveWater < 0.0) {
-        color = mix(color, vec3(0.02, 0.05, 0.08), 0.5);
-      }
+      // Faint caustic over the black background, outside the glyphs.
+      vec3 bgColor = LIGHT_COLOR * light * BRIGHTNESS * 0.25;
 
-      // Overlay the digits on top — keep them readable as a brighter highlight
-      // that the caustic still plays across.
-      color += vec3(0.18, 0.22, 0.28) * mask;
+      vec3 color = mix(bgColor, textColor, mask);
 
       gl_FragColor = vec4(color, 1.0);
     }
