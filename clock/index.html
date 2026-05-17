@@ -60,13 +60,13 @@
     }
   </style>
 </head>
-<body>
+<body onclick="toggleFullscreen()" ontouchstart="toggleFullscreen()">
   <svg id="svg">
     <text id="clock" x="0" y="15"></text>
   </svg>
-  <button id="fullscreen-btn" aria-label="Enter fullscreen" onclick="toggleFullscreen(event)">
-    <svg viewBox="0 0 24 24">
-      <path d="M4 9 V4 H9 M20 9 V4 H15 M4 15 V20 H9 M20 15 V20 H15"/>
+  <button id="fullscreen-btn" aria-label="Enter fullscreen" onclick="toggleFullscreen(event)" ontouchstart="toggleFullscreen(event)">
+    <svg id="fullscreen-icon" viewBox="0 0 24 24">
+      <path id="fullscreen-icon-path" d="M4 9 V4 H9 M20 9 V4 H15 M4 15 V20 H9 M20 15 V20 H15"/>
     </svg>
   </button>
 </body>
@@ -104,6 +104,24 @@
       screen.orientation.lock('landscape').catch(() => {});
     }
   };
+
+  const ENTER_FS_PATH = "M4 9 V4 H9 M20 9 V4 H15 M4 15 V20 H9 M20 15 V20 H15",
+        EXIT_FS_PATH = "M9 4 V9 H4 M15 4 V9 H20 M9 20 V15 H4 M15 20 V15 H20",
+        FS_ICON_PATH = document.getElementById('fullscreen-icon-path'),
+        FS_BTN = document.getElementById('fullscreen-btn');
+
+  function isFullscreen() {
+    return !!(document.fullscreenElement || document.webkitFullscreenElement || document.webkitIsFullScreen);
+  };
+
+  function updateFullscreenIcon() {
+    const fs = isFullscreen();
+    FS_ICON_PATH.setAttribute('d', fs ? EXIT_FS_PATH : ENTER_FS_PATH);
+    FS_BTN.setAttribute('aria-label', fs ? 'Exit fullscreen' : 'Enter fullscreen');
+  };
+
+  document.addEventListener('fullscreenchange', updateFullscreenIcon);
+  document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
 
   function updateDisplayTime() {
     const [_wholeMatch, time, _ampm] = (new Date)
