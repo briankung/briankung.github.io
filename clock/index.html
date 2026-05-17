@@ -129,7 +129,7 @@
 
     const float TAU = 6.28318530718;
     const vec3  LIGHT_COLOR = vec3(0.65, 0.88, 1.0);
-    const float BRIGHTNESS  = 1.2;
+    const float BRIGHTNESS  = 1.7;
     const float FALLOFF     = 0.6;
     const float CELL_DENSITY = 1.4; // larger = smaller cells
 
@@ -154,16 +154,26 @@
       vec2 uv = gl_FragCoord.xy / uResolution.xy;
       float mask = texture2D(uMask, uv).r;
 
-      // Caustic over the entire wall, not just the digits
-      vec2 p = gl_FragCoord.xy / uResolution.y * TAU * CELL_DENSITY - 250.0;
+      // Spotlight stretches until its right edge meets the right viewport.
+      // The center sits at (40%, 60%); the outer radius in height-units is the
+      // distance from there to the right edge. Cell density scales inversely
+      // so roughly the same number of cells fit inside the spotlight.
+      // Spotlight stays in the upper portion. Compress vertically so the lobe
+      // stretches toward the right edge but never reaches the bottoms or the
+      // left corner.
+      float aspect = uResolution.x / uResolution.y;
+      vec2 spotCenter = vec2(uResolution.x * 0.4, uResolution.y * 0.75);
+      float outerR = 0.55 * aspect;
+      float innerR = 0.05;
+      float densityScale = 0.45 / outerR;
+
+      vec2 p = gl_FragCoord.xy / uResolution.y * TAU * CELL_DENSITY * densityScale - 250.0;
       float light = caustic(p, uTime * 0.5 + 23.0);
 
-      // Cluster the visible caustic around screen center — same cell size,
-      // smaller bright patch so only a few cells light up at a time.
-      vec2 spotCenter = vec2(uResolution.x * 0.4, uResolution.y * 0.6);
       vec2 centered = (gl_FragCoord.xy - spotCenter) / uResolution.y;
+      centered.y *= 1.7;
       float r = length(centered);
-      float spotlight = 1.0 - smoothstep(0.18, 0.45, r);
+      float spotlight = 1.0 - smoothstep(innerR, outerR, r);
       light *= spotlight;
 
       float heightAboveWater = uv.y - uWaterLevel;
