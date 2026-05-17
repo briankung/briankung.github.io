@@ -13,7 +13,7 @@
       display: grid;
     }
 
-    svg {
+    #svg {
       width: 100%;
       margin: auto;
     }
@@ -27,12 +27,48 @@
       font-size: x-small;
       fill: darkgray;
     }
+
+    #fullscreen-btn {
+      position: fixed;
+      bottom: 1rem;
+      right: 1rem;
+      width: 2.5rem;
+      height: 2.5rem;
+      padding: 0;
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      opacity: 0.35;
+      transition: opacity 0.2s ease;
+      z-index: 10;
+    }
+
+    #fullscreen-btn:hover,
+    #fullscreen-btn:focus {
+      opacity: 0.85;
+      outline: none;
+    }
+
+    #fullscreen-btn svg {
+      width: 100%;
+      height: 100%;
+      fill: none;
+      stroke: #f8f8ff;
+      stroke-width: 2;
+      stroke-linecap: round;
+      stroke-linejoin: round;
+    }
   </style>
 </head>
-<body onclick="toggleFullscreen()" ontouchstart="toggleFullscreen()">
+<body>
   <svg id="svg">
     <text id="clock" x="0" y="15"></text>
   </svg>
+  <button id="fullscreen-btn" aria-label="Enter fullscreen" onclick="toggleFullscreen(event)">
+    <svg viewBox="0 0 24 24">
+      <path d="M4 9 V4 H9 M20 9 V4 H15 M4 15 V20 H9 M20 15 V20 H15"/>
+    </svg>
+  </button>
 </body>
 </html>
 
@@ -48,9 +84,11 @@
         SMALLER_SVG = "0 0 41 18",
         BIGGER_SVG = "0 0 31 18";
 
-  function toggleFullscreen() {
+  function toggleFullscreen(event) {
+    if (event) event.stopPropagation();
     NO_SLEEP.enable();
     document.webkitIsFullScreen == undefined ? standardToggleFullscreen() : webkitToggleFullscreen();
+    lockLandscape();
   };
 
   function webkitToggleFullscreen() {
@@ -59,6 +97,12 @@
 
   function standardToggleFullscreen() {
     document.fullscreen ? document.exitFullscreen() : document.body.requestFullscreen();
+  };
+
+  function lockLandscape() {
+    if (screen.orientation && screen.orientation.lock) {
+      screen.orientation.lock('landscape').catch(() => {});
+    }
   };
 
   function updateDisplayTime() {
