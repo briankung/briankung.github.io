@@ -2,7 +2,9 @@
 <html>
 <head>
   <meta charset="utf-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
   <title>briankung.xyz - 阿公 clock</title>
   <link rel="apple-touch-icon" href="images/icons/icon-192x192.png">
 
@@ -12,7 +14,8 @@
       padding: 0;
       background-color: black;
       width: 100%;
-      height: 100%;
+      height: 100vh;
+      height: 100dvh;
       overflow: hidden;
     }
 
@@ -24,8 +27,8 @@
 
     #fullscreen-btn {
       position: fixed;
-      bottom: 1rem;
-      right: 1rem;
+      bottom: calc(1rem + env(safe-area-inset-bottom));
+      right: calc(1rem + env(safe-area-inset-right));
       width: 2.5rem;
       height: 2.5rem;
       padding: 0;
@@ -54,9 +57,9 @@
     }
   </style>
 </head>
-<body onclick="toggleFullscreen()" ontouchstart="toggleFullscreen()">
+<body onclick="toggleFullscreen(event)">
   <canvas id="clock-canvas"></canvas>
-  <button id="fullscreen-btn" aria-label="Enter fullscreen" onclick="toggleFullscreen(event)" ontouchstart="toggleFullscreen(event)">
+  <button id="fullscreen-btn" aria-label="Enter fullscreen" onclick="toggleFullscreen(event)">
     <svg id="fullscreen-icon" viewBox="0 0 24 24">
       <path id="fullscreen-icon-path" d="M4 9 V4 H9 M20 9 V4 H15 M4 15 V20 H9 M20 15 V20 H15"/>
     </svg>
@@ -71,11 +74,35 @@
         ONE_MINUTE_IN_MILLISECONDS = MILLISECONDS * 60,
         NO_SLEEP = new NoSleep();
 
+  let noSleepOn = false;
+
+  function isStandalone() {
+    return window.navigator.standalone === true ||
+           window.matchMedia('(display-mode: standalone)').matches ||
+           window.matchMedia('(display-mode: fullscreen)').matches;
+  };
+
+  function setNoSleep(on) {
+    if (on === noSleepOn) return;
+    on ? NO_SLEEP.enable() : NO_SLEEP.disable();
+    noSleepOn = on;
+  };
+
   function toggleFullscreen(event) {
     if (event) event.stopPropagation();
-    NO_SLEEP.enable();
-    document.webkitIsFullScreen == undefined ? standardToggleFullscreen() : webkitToggleFullscreen();
-    lockLandscape();
+    // In an installed PWA there's no browser chrome to toggle, so the button
+    // becomes a wake-lock toggle. In a regular browser tab, tie the wake lock
+    // to fullscreen state — on entering, on while in, off on exit.
+    if (isStandalone()) {
+      setNoSleep(!noSleepOn);
+      if (noSleepOn) lockLandscape();
+    } else {
+      const enteringFullscreen = !isFullscreen();
+      setNoSleep(enteringFullscreen);
+      document.webkitIsFullScreen == undefined ? standardToggleFullscreen() : webkitToggleFullscreen();
+      if (enteringFullscreen) lockLandscape();
+    }
+    updateFullscreenIcon();
   };
 
   function webkitToggleFullscreen() {
@@ -102,9 +129,9 @@
   };
 
   function updateFullscreenIcon() {
-    const fs = isFullscreen();
-    FS_ICON_PATH.setAttribute('d', fs ? EXIT_FS_PATH : ENTER_FS_PATH);
-    FS_BTN.setAttribute('aria-label', fs ? 'Exit fullscreen' : 'Enter fullscreen');
+    const active = isStandalone() ? noSleepOn : isFullscreen();
+    FS_ICON_PATH.setAttribute('d', active ? EXIT_FS_PATH : ENTER_FS_PATH);
+    FS_BTN.setAttribute('aria-label', active ? 'Disable wake lock' : 'Enable wake lock');
   };
 
   document.addEventListener('fullscreenchange', updateFullscreenIcon);
