@@ -42,8 +42,8 @@
     #fullscreen-btn { right: calc(1rem + env(safe-area-inset-right)); }
     #animation-btn  { right: calc(4rem + env(safe-area-inset-right)); }
 
-    .toolbar-btn:hover,
-    .toolbar-btn:focus {
+    .toolbar-btn:focus-visible,
+    .toolbar-btn.is-active {
       opacity: 0.85;
       outline: none;
     }
@@ -68,7 +68,7 @@
   </button>
   <button id="fullscreen-btn" class="toolbar-btn" aria-label="Enter fullscreen" onclick="toggleFullscreen(event)">
     <svg id="fullscreen-icon" viewBox="0 0 24 24">
-      <path id="fullscreen-icon-path" d="M4 9 V4 H9 M20 9 V4 H15 M4 15 V20 H9 M20 15 V20 H15"/>
+      <path id="fullscreen-icon-path" d="M20 14 A 8 8 0 1 1 10 4 A 6 6 0 0 0 20 14 Z"/>
     </svg>
   </button>
 </body>
@@ -126,35 +126,57 @@
     }
   };
 
-  const ENTER_FS_PATH = "M4 9 V4 H9 M20 9 V4 H15 M4 15 V20 H9 M20 15 V20 H15",
-        EXIT_FS_PATH = "M9 4 V9 H4 M15 4 V9 H20 M9 20 V15 H4 M15 20 V15 H20",
-        FS_ICON_PATH = document.getElementById('fullscreen-icon-path'),
+  const FS_ICON_PATH = document.getElementById('fullscreen-icon-path'),
         FS_BTN = document.getElementById('fullscreen-btn');
+
+  // Each button has two states bundled together: icon path, highlight, label.
+  // Highlight is always tied to the "on" state.
+  const WAKE_STATES = {
+    on:  { path: "M16 12 a4 4 0 1 1 -8 0 a4 4 0 1 1 8 0 M12 2 v2 M12 20 v2 M2 12 h2 M20 12 h2 M4.9 4.9 l1.4 1.4 M17.7 17.7 l1.4 1.4 M4.9 19.1 l1.4 -1.4 M17.7 6.3 l1.4 -1.4",
+           highlight: true,
+           label: 'Disable wake lock' },
+    off: { path: "M20 14 A 8 8 0 1 1 10 4 A 6 6 0 0 0 20 14 Z",
+           highlight: false,
+           label: 'Enable wake lock' },
+  };
+
+  const ANIM_STATES = {
+    on:  { path: "M3 12 Q 7 6, 12 12 T 21 12",
+           highlight: true,
+           label: 'Disable animation' },
+    off: { path: "M3 12 H 21",
+           highlight: false,
+           label: 'Enable animation' },
+  };
+
+  function applyState(btn, pathEl, state) {
+    pathEl.setAttribute('d', state.path);
+    btn.setAttribute('aria-label', state.label);
+    btn.classList.toggle('is-active', state.highlight);
+  }
 
   function isFullscreen() {
     return !!(document.fullscreenElement || document.webkitFullscreenElement || document.webkitIsFullScreen);
   };
 
   function updateFullscreenIcon() {
-    const active = isStandalone() ? noSleepOn : isFullscreen();
-    FS_ICON_PATH.setAttribute('d', active ? EXIT_FS_PATH : ENTER_FS_PATH);
-    FS_BTN.setAttribute('aria-label', active ? 'Disable wake lock' : 'Enable wake lock');
+    const on = isStandalone() ? noSleepOn : isFullscreen();
+    applyState(FS_BTN, FS_ICON_PATH, on ? WAKE_STATES.on : WAKE_STATES.off);
   };
 
   document.addEventListener('fullscreenchange', updateFullscreenIcon);
   document.addEventListener('webkitfullscreenchange', updateFullscreenIcon);
 
   const ANIM_BTN = document.getElementById('animation-btn'),
-        ANIM_ICON_PATH = document.getElementById('animation-icon-path'),
-        ANIM_ON_PATH  = "M3 12 Q 7 6, 12 12 T 21 12",
-        ANIM_OFF_PATH = "M3 12 H 21";
+        ANIM_ICON_PATH = document.getElementById('animation-icon-path');
 
   let animationOn = true;
 
   function updateAnimationIcon() {
-    ANIM_ICON_PATH.setAttribute('d', animationOn ? ANIM_ON_PATH : ANIM_OFF_PATH);
-    ANIM_BTN.setAttribute('aria-label', animationOn ? 'Disable animation' : 'Enable animation');
+    applyState(ANIM_BTN, ANIM_ICON_PATH, animationOn ? ANIM_STATES.on : ANIM_STATES.off);
   };
+
+  updateAnimationIcon();
 
   function toggleAnimation(event) {
     if (event) event.stopPropagation();
