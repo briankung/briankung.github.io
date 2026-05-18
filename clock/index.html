@@ -313,7 +313,14 @@
     uploadMask();
   }
 
+  const TARGET_FPS = 24,
+        FRAME_INTERVAL_MS = 1000 / TARGET_FPS;
+  let lastFrameTime = -Infinity;
+
   function frame(t) {
+    requestAnimationFrame(frame);
+    if (t - lastFrameTime < FRAME_INTERVAL_MS) return;
+    lastFrameTime = t;
     gl.uniform2f(uResolution, canvas.width, canvas.height);
     gl.uniform1f(uTime, t / 1000);
     gl.uniform1f(uWaterLevel, waterLevel);
@@ -321,7 +328,6 @@
     gl.activeTexture(gl.TEXTURE0);
     gl.bindTexture(gl.TEXTURE_2D, maskTex);
     gl.drawArrays(gl.TRIANGLE_STRIP, 0, 4);
-    requestAnimationFrame(frame);
   }
 
   window.addEventListener('resize', resize);
